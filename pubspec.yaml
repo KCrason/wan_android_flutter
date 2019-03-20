@@ -28,7 +28,9 @@ dependencies:
   transparent_image: ^1.0.0
   dio: ^2.1.0
   flutter_swiper : ^1.1.5
-#  path_provide: ^0.5.0+1
+  flutter_webview_plugin: ^0.3.1
+  cookie_jar: ^1.0.0
+  path_provider: ^0.5.0+1
 
 dev_dependencies:
   flutter_test:

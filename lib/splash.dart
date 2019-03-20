@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'user/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 
 void main() {
@@ -10,13 +12,21 @@ void main() {
 }
 
 class SplashWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
+  _intentPage(BuildContext context) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    bool isLogin = preferences.getBool('isLogin');
     Future.delayed(Duration(seconds: 3), () {
       Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) => new MyApp()),
+          new MaterialPageRoute(
+              builder: (context) =>
+                  (isLogin != null && isLogin) ? MyApp() : Login()),
           (route) => false);
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _intentPage(context);
     return Container(
       child: FadeInImage.memoryNetwork(
           fit: BoxFit.cover,

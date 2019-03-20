@@ -10,7 +10,8 @@ class Home extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<Home> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<Home>
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   final tabs = ['头条', '项目', '公众号', '体系'];
   var _homeItems = [Popular(), Project(), Public(), System()];
   TabController _tabController;
@@ -30,6 +31,7 @@ class _HomePageState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return new Scaffold(
       appBar: AppBar(
         title: GestureDetector(
@@ -80,4 +82,8 @@ class _HomePageState extends State<Home> with SingleTickerProviderStateMixin {
           }).toList()),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
