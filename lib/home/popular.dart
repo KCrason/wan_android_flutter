@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:wan_android_flutter/network/PopularBannerBean.dart';
-import 'package:wan_android_flutter/widgets/PopularBanner.dart';
+import 'package:wan_android_flutter/widgets/popular_banner.dart';
 import 'package:wan_android_flutter/network/PopularArticleBean.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:wan_android_flutter/ArticleDetail.dart';
+import 'package:wan_android_flutter/utils/constant.dart';
+import 'package:wan_android_flutter/utils/app_route.dart';
 
 //头条
 class Popular extends StatefulWidget {
@@ -26,8 +27,10 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
 
   void loadMore() async {
     try {
-      Response responseArticle = await Dio()
-          .get('https://www.wanandroid.com/article/list/$_curPage/json');
+      _curPage++;
+      isLoadMore = true;
+      Response responseArticle =
+          await Dio().get(Constants.generatePopularArticleUrl(_curPage));
       final articleJson = json.decode(responseArticle.toString());
       setState(() {
         isLoadMore = false;
@@ -39,12 +42,13 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void _requestBanner() async {
+  Future<Null> _requestBanner() async {
     try {
-      Response responseBanner =
-          await Dio().get('https://www.wanandroid.com/banner/json');
-      Response responseArticle = await Dio()
-          .get('https://www.wanandroid.com/article/list/$_curPage/json');
+      _curPage = 0;
+      isLoadMore = false;
+      Response responseBanner = await Dio().get(Constants.popularBannerUrl);
+      Response responseArticle =
+          await Dio().get(Constants.generatePopularArticleUrl(_curPage));
       final bannerJson = json.decode(responseBanner.toString());
       final articleJson = json.decode(responseArticle.toString());
       setState(() {
@@ -65,8 +69,6 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
               _scrollController.position.maxScrollExtent &&
           !isLoadMore) {
         setState(() {
-          _curPage++;
-          isLoadMore = true;
           loadMore();
         });
       }
@@ -96,136 +98,145 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
       );
     } else {
       return Container(
-        child: Center(
-          child: ListView.separated(
-              controller: _scrollController,
-              separatorBuilder: (BuildContext context, int index) =>
-                  new Divider(
-                    color: index >= 1 ? Colors.grey[300] : Colors.transparent,
-                  ),
-              itemCount: _articleData == null ? 1 : _articleData.length + 2,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return PopularBannerWidget(
-                    bannerTitle: (index) {
-                      return PopularBannerBean.fromMap(_bannerData[index])
-                          .title;
-                    },
-                    bannerCount: _bannerData == null ? 0 : _bannerData.length,
-                    buildBannerItem: (context, index) {
-                      PopularBannerBean popularBannerBean =
-                          PopularBannerBean.fromMap(_bannerData[index]);
-                      return Container(
-                        child: GestureDetector(
-                          onTap: () {
-                            print('You click $index');
-                          },
-                          child: FadeInImage.memoryNetwork(
-                            placeholder: kTransparentImage,
-                            image: popularBannerBean.imagePath,
-                            fit: BoxFit.cover,
+        child: RefreshIndicator(
+            child: ListView.builder(
+                controller: _scrollController,
+                itemCount: _articleData == null ? 1 : _articleData.length + 2,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _buildBanner();
+                  } else if (index == _articleData.length + 1) {
+                    return Container(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                } else if (index == _articleData.length + 1) {
-                  return Container(
-                    padding: EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(left: 12.0),
-                          child: Text(
-                            '正在加载...',
-                            style: TextStyle(fontSize: 16.0),
-                          ),
-                        )
-                      ],
-                    ),
-                  );
-                }
-                return _buildItem(
-                    PopularArticleBean.fromMap(_articleData[index - 1]));
-              }),
-        ),
+                          Container(
+                            margin: EdgeInsets.only(left: 12.0),
+                            child: Text(
+                              '正在加载...',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  }
+                  return _buildItem(
+                      PopularArticleBean.fromMap(_articleData[index - 1]));
+                }),
+            onRefresh: _requestBanner),
       );
     }
   }
 
+  Widget _buildBanner() {
+    return PopularBannerWidget(
+      bannerTitle: (index) {
+        return PopularBannerBean.fromMap(_bannerData[index]).title;
+      },
+      bannerCount: _bannerData == null ? 0 : _bannerData.length,
+      buildBannerItem: (context, index) {
+        PopularBannerBean popularBannerBean =
+            PopularBannerBean.fromMap(_bannerData[index]);
+        return Container(
+          child: GestureDetector(
+            onTap: () {
+              AppRoute.intentArticleDetail({
+                'title': popularBannerBean.title,
+                'url': popularBannerBean.url
+              });
+//              Navigator.of(context)
+//                  .push(new MaterialPageRoute(builder: (context) {
+//                return ArticleDetail(
+//                  url: popularBannerBean.url,
+//                  title: popularBannerBean.title,
+//                );
+//              }));
+            },
+            child: FadeInImage.memoryNetwork(
+              placeholder: kTransparentImage,
+              image: popularBannerBean.imagePath,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildItem(PopularArticleBean popularArticleBean) {
     return Material(
-      child: InkWell(
-        onTap: () {
-          Navigator.push(context, new MaterialPageRoute(builder: (context) {
-            return ArticleDetail(
-              title: popularArticleBean.title,
-              url: popularArticleBean.link,
-            );
-          }));
-        },
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                  flex: 9,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        '${popularArticleBean.title}',
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(top: 6.0),
-                        child: Row(
-                          children: <Widget>[
-                            Text(
-                              '${popularArticleBean.niceDate}',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                '来源：${popularArticleBean.author}',
+      child: Card(
+        elevation: 3.0,
+        child: InkWell(
+          onTap: () {
+            AppRoute.intentArticleDetail({
+              'title': popularArticleBean.title,
+              'url': popularArticleBean.link
+            });
+//            Navigator.push(context, new MaterialPageRoute(builder: (context) {
+//              return ArticleDetail(
+//                title: popularArticleBean.title,
+//                url: popularArticleBean.link,
+//              );
+//            }));
+          },
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                    flex: 9,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          '${popularArticleBean.title}',
+                          style: TextStyle(fontSize: 18.0),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 6.0),
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                '${popularArticleBean.niceDate}',
                                 style: TextStyle(color: Colors.grey),
                               ),
-                            )
-                          ],
+                              Container(
+                                margin: EdgeInsets.only(left: 16.0),
+                                child: Text(
+                                  '来源：${popularArticleBean.author}',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  )),
-              Expanded(
-                  flex: 1,
-                  child: Icon(
-                    popularArticleBean.collect
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color:
-                        popularArticleBean.collect ? Colors.red : Colors.grey,
-                  ))
-            ],
+                      ],
+                    )),
+                Expanded(
+                    flex: 1,
+                    child: Icon(
+                      popularArticleBean.collect
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color:
+                          popularArticleBean.collect ? Colors.red : Colors.grey,
+                    ))
+              ],
+            ),
           ),
         ),
       ),
     );
-
-//    ListTile(
-//      trailing: Icon(
-//        popularArticleBean.collect ? Icons.favorite : Icons.favorite_border,
-//      ),
-//      title: Text('${popularArticleBean.title}'),
-//    );
   }
 
   @override

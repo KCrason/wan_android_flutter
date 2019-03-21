@@ -6,6 +6,8 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:wan_android_flutter/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wan_android_flutter/utils/constant.dart';
+import 'package:flutter/services.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -15,16 +17,11 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _globalKey = new GlobalKey<ScaffoldState>();
 
+
   String _account;
   String _password;
 
   bool _isLogging = false;
-
-  // Cookie files will be saved in "./cookies"
-//  var cj = new PersistCookieJar(
-//    dir: "./cookies",
-//    ignoreExpires: true, //save/load even cookies that have expired.
-//  );
 
   //保存登陆状态
   _saveLoginState() async {
@@ -38,13 +35,11 @@ class _LoginState extends State<Login> {
     Directory tempDir = await getTemporaryDirectory();
     PersistCookieJar persistCookieJar = new PersistCookieJar(dir: tempDir.path);
 
-
     dio.interceptors.add(CookieManager(persistCookieJar));
-    Response response = await dio.post('https://www.wanandroid.com/user/login',
+    Response response = await dio.post(Constants.loginUrl,
         queryParameters: {'username': _account, 'password': _password});
 
     final jsonResult = json.decode(response.toString());
-
 
     List<Cookie> cookies = persistCookieJar
         .loadForRequest(Uri.parse('https://www.wanandroid.com/user/login'));
@@ -67,6 +62,7 @@ class _LoginState extends State<Login> {
       ));
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +99,17 @@ class _LoginState extends State<Login> {
               },
             ),
             Container(
-              margin: EdgeInsets.only(top: 100.0),
+              margin: EdgeInsets.only(top: 16.0, right: 16.0),
+              child: Align(
+                child: Text(
+                  '立即注册',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+                alignment: FractionalOffset.centerRight,
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 20.0),
               child: SizedBox(
                 height: 44.0,
                 width: MediaQuery.of(context).size.width * 0.7,
@@ -131,9 +137,11 @@ class _LoginState extends State<Login> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text(
-                          '立即登录',
-                          style: TextStyle(fontSize: 17),
+                        GestureDetector(
+                          child: Text(
+                            '立即登录',
+                            style: TextStyle(fontSize: 17),
+                          ),
                         ),
                         Container(
                           height: _isLogging ? 17 : 0,

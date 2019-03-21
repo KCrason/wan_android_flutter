@@ -7,7 +7,7 @@ class Public extends StatefulWidget {
   _PublicState createState() => _PublicState();
 }
 
-class _PublicState extends State<Public> {
+class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin{
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -19,4 +19,8 @@ class _PublicState extends State<Public> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

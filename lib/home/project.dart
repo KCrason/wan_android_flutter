@@ -7,7 +7,7 @@ class Project extends StatefulWidget {
   _ProjectState createState() => _ProjectState();
 }
 
-class _ProjectState extends State<Project> {
+class _ProjectState extends State<Project> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -19,4 +19,8 @@ class _ProjectState extends State<Project> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

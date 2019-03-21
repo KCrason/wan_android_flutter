@@ -15,11 +15,11 @@ class SplashWidget extends StatelessWidget {
   _intentPage(BuildContext context) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     bool isLogin = preferences.getBool('isLogin');
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 1), () {
       Navigator.of(context).pushAndRemoveUntil(
           new MaterialPageRoute(
               builder: (context) =>
-                  (isLogin != null && isLogin) ? MyApp() : Login()),
+                   MyApp()),
           (route) => false);
     });
   }

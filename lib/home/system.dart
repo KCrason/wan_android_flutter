@@ -6,7 +6,7 @@ class System extends StatefulWidget {
   _SystemState createState() => _SystemState();
 }
 
-class _SystemState extends State<System> {
+class _SystemState extends State<System> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return Container(child: Center(
@@ -16,4 +16,8 @@ class _SystemState extends State<System> {
       ),
     ),);
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
