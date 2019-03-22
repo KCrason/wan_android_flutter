@@ -30,8 +30,6 @@ class _MyHomePageState extends State<MyHomePage>
   var _currentIndex = 0;
   var _pages = [new Home(), new Discovery(), new Me()];
 
-  static const loginPlugin = const EventChannel('android:Flutter');
-
   PageController _controller;
 
   @override
@@ -40,20 +38,20 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
     _currentIndex = 0;
     _controller = PageController(initialPage: 0);
-    loginPlugin.receiveBroadcastStream().listen((value) {
-      switch (value) {
-        case 'IntentToLogin':
-          Future.delayed(Duration(milliseconds: 500), () {
-            Navigator.of(context)
-                .push(new MaterialPageRoute(builder: (context) {
-              return Login();
-            }));
-          });
-          break;
-      }
-    }, onError: (error) {
-      print('This is Error Message:$error');
-    });
+//    loginPlugin.receiveBroadcastStream().listen((value) {
+//      switch (value) {
+//        case 'IntentToLogin':
+//          Future.delayed(Duration(milliseconds: 500), () {
+//            Navigator.of(context)
+//                .push(new MaterialPageRoute(builder: (context) {
+//              return Login();
+//            }));
+//          });
+//          break;
+//      }
+//    }, onError: (error) {
+//      print('This is Error Message:$error');
+//    });
   }
 
   _pageChange(int index) {

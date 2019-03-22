@@ -1,11 +1,11 @@
 import 'package:flutter/services.dart';
 
+final MethodChannel _methodChannel = const MethodChannel('flutter:Android');
+
 class AppRoute {
-  static Future<void> intentArticleDetail(
-      Map<String, dynamic> arguments) async {
+  static Future<void> intentShareArticle(Map<String, dynamic> arguments) async {
     try {
-      final channel = const MethodChannel('flutter:Android');
-      await channel.invokeMethod('ArticleDetail', arguments);
+      await _methodChannel.invokeMethod('ShareArticle', arguments);
     } catch (e) {
       print(e);
     }

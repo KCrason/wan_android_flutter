@@ -5,8 +5,12 @@ import 'package:wan_android_flutter/network/PopularBannerBean.dart';
 import 'package:wan_android_flutter/widgets/popular_banner.dart';
 import 'package:wan_android_flutter/network/PopularArticleBean.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:wan_android_flutter/article_detail.dart';
+import 'package:wan_android_flutter/network/api_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
-import 'package:wan_android_flutter/utils/app_route.dart';
+import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:wan_android_flutter/user/login.dart';
 
 //头条
 class Popular extends StatefulWidget {
@@ -23,32 +27,29 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   int _curPage = 0;
   ScrollController _scrollController = new ScrollController();
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   bool isLoadMore = false;
 
-  void loadMore() async {
-    try {
-      _curPage++;
-      isLoadMore = true;
-      Response responseArticle =
-          await Dio().get(Constants.generatePopularArticleUrl(_curPage));
+  void loadMore() {
+    _curPage++;
+    isLoadMore = true;
+    ApiRequest.getPopularListData(_curPage).then((responseArticle) {
       final articleJson = json.decode(responseArticle.toString());
       setState(() {
         isLoadMore = false;
         List newArticleData = articleJson['data']['datas'];
         _articleData.addAll(newArticleData);
       });
-    } catch (e) {
-      print(e);
-    }
+    });
   }
 
   Future<Null> _requestBanner() async {
     try {
       _curPage = 0;
       isLoadMore = false;
-      Response responseBanner = await Dio().get(Constants.popularBannerUrl);
-      Response responseArticle =
-          await Dio().get(Constants.generatePopularArticleUrl(_curPage));
+      Response responseBanner = await ApiRequest.getBannerData();
+      Response responseArticle = await ApiRequest.getPopularListData(_curPage);
       final bannerJson = json.decode(responseBanner.toString());
       final articleJson = json.decode(responseArticle.toString());
       setState(() {
@@ -130,7 +131,8 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                     );
                   }
                   return _buildItem(
-                      PopularArticleBean.fromMap(_articleData[index - 1]));
+                      PopularArticleBean.fromMap(_articleData[index - 1]),
+                      index - 1);
                 }),
             onRefresh: _requestBanner),
       );
@@ -149,17 +151,15 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
         return Container(
           child: GestureDetector(
             onTap: () {
-              AppRoute.intentArticleDetail({
-                'title': popularBannerBean.title,
-                'url': popularBannerBean.url
-              });
-//              Navigator.of(context)
-//                  .push(new MaterialPageRoute(builder: (context) {
-//                return ArticleDetail(
-//                  url: popularBannerBean.url,
-//                  title: popularBannerBean.title,
-//                );
-//              }));
+              Navigator.of(context)
+                  .push(new MaterialPageRoute(builder: (context) {
+                return ArticleDetail(
+                  url: popularBannerBean.url,
+                  title: popularBannerBean.title,
+                  articleId: '${popularBannerBean.id}',
+                  isBannerArticle: true,
+                );
+              }));
             },
             child: FadeInImage.memoryNetwork(
               placeholder: kTransparentImage,
@@ -172,22 +172,21 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  Widget _buildItem(PopularArticleBean popularArticleBean) {
+  Widget _buildItem(PopularArticleBean popularArticleBean, int index) {
     return Material(
       child: Card(
         elevation: 3.0,
         child: InkWell(
           onTap: () {
-            AppRoute.intentArticleDetail({
-              'title': popularArticleBean.title,
-              'url': popularArticleBean.link
-            });
-//            Navigator.push(context, new MaterialPageRoute(builder: (context) {
-//              return ArticleDetail(
-//                title: popularArticleBean.title,
-//                url: popularArticleBean.link,
-//              );
-//            }));
+            Navigator.push(context, new MaterialPageRoute(builder: (context) {
+              return ArticleDetail(
+                title: popularArticleBean.title,
+                url: popularArticleBean.link,
+                isCollection: popularArticleBean.collect,
+                articleId: '${popularArticleBean.id}',
+                isBannerArticle: false,
+              );
+            }));
           },
           child: Container(
             padding: EdgeInsets.all(16.0),
@@ -223,14 +222,20 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                       ],
                     )),
                 Expanded(
-                    flex: 1,
+                  flex: 1,
+                  child: GestureDetector(
+                    onTap: () {
+                      _clickCollection(index);
+                    },
                     child: Icon(
                       popularArticleBean.collect
                           ? Icons.favorite
                           : Icons.favorite_border,
                       color:
                           popularArticleBean.collect ? Colors.red : Colors.grey,
-                    ))
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -239,11 +244,57 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  //收藏相关操作
+  _clickCollection(int index) async {
+    PopularArticleBean popularArticleBean =
+        PopularArticleBean.fromMap(_articleData[index]);
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
+    if (isLogin != null && isLogin) {
+      if (popularArticleBean.collect) {
+        Response response = await ApiRequest.unCollectionWebsiteArticle(
+            '${popularArticleBean.id}');
+        print('KCrason UnCollection:${response.toString()}');
+        final jsonResult = json.decode(response.toString());
+        int errorCode = jsonResult['errorCode'];
+        if (errorCode == 0) {
+          setState(() {
+            popularArticleBean.collect = false;
+            SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '已取消收藏');
+          });
+        } else {
+          SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '取消失败');
+        }
+      } else {
+        Response response = await ApiRequest.collectionWebsiteArticle(
+            '${popularArticleBean.id}');
+        print('KCrason Collection:${response.toString()}');
+        final jsonResult = json.decode(response.toString());
+        int errorCode = jsonResult['errorCode'];
+        if (errorCode == 0) {
+          setState(() {
+            popularArticleBean.collect = true;
+            SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏成功');
+          });
+        } else {
+          SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏失败');
+        }
+      }
+    } else {
+      Navigator.push(context, new MaterialPageRoute(builder: (context) {
+        return Login();
+      }));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     // TODO: implement build
-    return getBody();
+    return Scaffold(
+      key: _scaffoldKey,
+      body: getBody(),
+    );
   }
 
   @override

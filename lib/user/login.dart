@@ -4,10 +4,9 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'dart:convert';
-import 'package:wan_android_flutter/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
-import 'package:flutter/services.dart';
+import 'package:wan_android_flutter/network/api_request.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -17,7 +16,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _globalKey = new GlobalKey<ScaffoldState>();
 
-
   String _account;
   String _password;
 
@@ -26,43 +24,28 @@ class _LoginState extends State<Login> {
   //保存登陆状态
   _saveLoginState() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.setBool('isLogin', true);
+    await preferences.setBool(Constants.preferenceKeyIsLogin, true);
   }
 
   void _login() async {
     _isLogging = true;
-    Dio dio = new Dio();
-    Directory tempDir = await getTemporaryDirectory();
-    PersistCookieJar persistCookieJar = new PersistCookieJar(dir: tempDir.path);
-
-    dio.interceptors.add(CookieManager(persistCookieJar));
-    Response response = await dio.post(Constants.loginUrl,
-        queryParameters: {'username': _account, 'password': _password});
-
-    final jsonResult = json.decode(response.toString());
-
-    List<Cookie> cookies = persistCookieJar
-        .loadForRequest(Uri.parse('https://www.wanandroid.com/user/login'));
-    print('result cookies: $cookies');
-
-    int errorCode = jsonResult['errorCode'];
-    if (errorCode == 0) {
-      _saveLoginState();
-      Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(builder: (context) {
-        return new Home();
-      }), (route) => false);
-    } else {
-      setState(() {
-        _isLogging = false;
-      });
-      _globalKey.currentState.showSnackBar(SnackBar(
-        content: Text('登陆失败：${jsonResult['errorMsg']}'),
-        duration: Duration(milliseconds: 500),
-      ));
-    }
+    ApiRequest.login(_account, _password).then((response) {
+      final jsonResult = json.decode(response.toString());
+      int errorCode = jsonResult['errorCode'];
+      if (errorCode == 0) {
+        _saveLoginState();
+        Navigator.pop(context);
+      } else {
+        setState(() {
+          _isLogging = false;
+        });
+        _globalKey.currentState.showSnackBar(SnackBar(
+          content: Text('登陆失败：${jsonResult['errorMsg']}'),
+          duration: Duration(milliseconds: 500),
+        ));
+      }
+    });
   }
-
 
   @override
   Widget build(BuildContext context) {
