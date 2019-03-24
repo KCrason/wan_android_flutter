@@ -111,7 +111,7 @@ class _ArticleDetailState extends State<ArticleDetail> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           ListTile(
-                            leading: Icon(Icons.refresh, color: Colors.white),
+                            leading: Icon(Icons.refresh),
                             title: Text('刷新'),
                             onTap: () {
                               _controller.reload();
@@ -119,7 +119,7 @@ class _ArticleDetailState extends State<ArticleDetail> {
                             },
                           ),
                           ListTile(
-                            leading: Icon(Icons.share, color: Colors.white),
+                            leading: Icon(Icons.share),
                             title: Text('分享'),
                             onTap: () {
                               AppRoute.intentShareArticle(
@@ -129,14 +129,12 @@ class _ArticleDetailState extends State<ArticleDetail> {
                           ),
                           Offstage(
                             child: ListTile(
-                              leading: Icon(
-                                localCollectionState
-                                    ? Icons.favorite
-                                    : Icons.favorite_border,
-                                color: localCollectionState
-                                    ? Colors.red
-                                    : Colors.white,
-                              ),
+                              leading: localCollectionState
+                                  ? Icon(
+                                      Icons.favorite,
+                                      color: Colors.red,
+                                    )
+                                  : Icon(Icons.favorite_border),
                               title: Text('收藏'),
                               onTap: () {
                                 _clickCollection(widget.articleId);
@@ -148,7 +146,6 @@ class _ArticleDetailState extends State<ArticleDetail> {
                           ListTile(
                             leading: Icon(
                               Icons.blur_circular,
-                              color: Colors.white,
                             ),
                             title: Text('在浏览器打开'),
                             onTap: () {

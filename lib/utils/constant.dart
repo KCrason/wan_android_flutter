@@ -19,6 +19,13 @@ class Constants {
 
 //  static String collectionOtherArticleUrl = 'https://www.wanandroid.com/lg/collect/add/json';
 
+  static String projectClassifyTabUrl =
+      'https://www.wanandroid.com/project/tree/json';
+
+  static String generateProjectListDataUrl(int classifyId, int curPage) {
+    return 'https://www.wanandroid.com/project/list/$curPage/json?cid=$classifyId';
+  }
+
   static String loginUrl = 'https://www.wanandroid.com/user/login';
 
   static String registerUrl = 'https://www.wanandroid.com/user/register';

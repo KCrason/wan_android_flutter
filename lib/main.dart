@@ -3,18 +3,37 @@ import 'package:wan_android_flutter/home.dart';
 import 'package:wan_android_flutter/discovery.dart';
 import 'package:wan_android_flutter/me.dart';
 import 'dart:ui';
-import 'package:flutter/services.dart';
-import 'user/login.dart';
+import 'package:event_bus/event_bus.dart';
 
 //import 'package:shared_preferences/shared_preferences.dart';
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  final List<Color> themeList = [
+    Colors.red,
+    Colors.teal,
+    Colors.pink,
+    Colors.amber,
+    Colors.orange,
+    Colors.green,
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.indigo,
+    Colors.cyan,
+    Colors.brown,
+    Colors.grey,
+    Colors.blueGrey
+  ];
+
+  Color themeColor;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Play Android',
-      theme: ThemeData.dark(),
       home: MyHomePage(),
     );
   }
@@ -36,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage>
   void initState() {
     // TODO: implement initState
     super.initState();
+
     _currentIndex = 0;
     _controller = PageController(initialPage: 0);
 //    loginPlugin.receiveBroadcastStream().listen((value) {
@@ -65,16 +85,6 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-          child: Offstage(
-            offstage: false,
-            child: AppBar(
-              elevation: 0,
-            ),
-          ),
-          preferredSize: Size.fromHeight(_currentIndex == 0
-              ? 0.07
-              : MediaQuery.of(context).size.height * 0.07)),
       body: PageView.builder(
         itemBuilder: (context, index) {
           return _pages[index];
@@ -86,9 +96,48 @@ class _MyHomePageState extends State<MyHomePage>
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('首页')),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), title: Text('导航')),
-          BottomNavigationBarItem(icon: Icon(Icons.group), title: Text('我的')),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: _currentIndex == 0
+                  ? Text('首页',
+                  style: TextStyle(color: Theme
+                      .of(context)
+                      .primaryColor))
+                  : Text('首页'),
+              activeIcon: Icon(
+                Icons.home,
+                color: Theme
+                    .of(context)
+                    .primaryColor,
+              )),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.explore),
+              title: _currentIndex == 1
+                  ? Text('导航',
+                  style: TextStyle(color: Theme
+                      .of(context)
+                      .primaryColor))
+                  : Text('导航'),
+              activeIcon: Icon(
+                Icons.explore,
+                color: Theme
+                    .of(context)
+                    .primaryColor,
+              )),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.group),
+              title: _currentIndex == 2
+                  ? Text('我的',
+                  style: TextStyle(color: Theme
+                      .of(context)
+                      .primaryColor))
+                  : Text('我的'),
+              activeIcon: Icon(
+                Icons.group,
+                color: Theme
+                    .of(context)
+                    .primaryColor,
+              )),
         ],
         currentIndex: _currentIndex,
         fixedColor: Colors.blue,

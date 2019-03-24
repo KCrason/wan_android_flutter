@@ -4,6 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:wan_android_flutter/network/project_classfiy_tab_bean.dart';
 
 class ApiRequest {
   //登陆
@@ -44,6 +45,22 @@ class ApiRequest {
     return await Dio().post(
         Constants.generateUnCollectionWebsiteArticleUrl(articleId),
         options: _getOptions(await getCookieJar()));
+  }
+
+  //获取项目分类tab
+  static void getProjectClassifyTabData(Function callback) async {
+    return await Dio().get(Constants.projectClassifyTabUrl).then((result) {
+      callback(ProjectClassifyTabBean.fromJson(result.data));
+    }).catchError((error) {
+      throw error;
+    });
+  }
+
+  //获取项目分类列表数据
+  static Future<Response> getProjectClassifyListData(
+      int classifyId, int curPage) async {
+    return await Dio()
+        .get(Constants.generateProjectListDataUrl(classifyId, curPage));
   }
 
   static _getOptions(PersistCookieJar persistCookieJar) {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:wan_android_flutter/network/PopularBannerBean.dart';
+import 'package:wan_android_flutter/network/popular_banner_bean.dart';
 import 'package:wan_android_flutter/widgets/popular_banner.dart';
-import 'package:wan_android_flutter/network/PopularArticleBean.dart';
+import 'package:wan_android_flutter/network/article_bean.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wan_android_flutter/article_detail.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
@@ -22,8 +22,8 @@ class Popular extends StatefulWidget {
 }
 
 class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
-  List _bannerData;
-  List _articleData;
+  PopularBannerBean _bannerData;
+  ArticleBean _articleData;
   int _curPage = 0;
   ScrollController _scrollController = new ScrollController();
 
@@ -35,11 +35,11 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     _curPage++;
     isLoadMore = true;
     ApiRequest.getPopularListData(_curPage).then((responseArticle) {
-      final articleJson = json.decode(responseArticle.toString());
+      ArticleBean newArticleData =
+      ArticleBean.fromJson(responseArticle.data['data']);
       setState(() {
         isLoadMore = false;
-        List newArticleData = articleJson['data']['datas'];
-        _articleData.addAll(newArticleData);
+        _articleData.datas.addAll(newArticleData.datas);
       });
     });
   }
@@ -50,11 +50,10 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
       isLoadMore = false;
       Response responseBanner = await ApiRequest.getBannerData();
       Response responseArticle = await ApiRequest.getPopularListData(_curPage);
-      final bannerJson = json.decode(responseBanner.toString());
-      final articleJson = json.decode(responseArticle.toString());
       setState(() {
-        _bannerData = bannerJson['data'];
-        _articleData = articleJson['data']['datas'];
+        _bannerData = PopularBannerBean.fromJson(responseBanner.data);
+        _articleData =
+            ArticleBean.fromJson(responseArticle.data['data']);
       });
     } catch (e) {
       print(e);
@@ -102,11 +101,13 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
         child: RefreshIndicator(
             child: ListView.builder(
                 controller: _scrollController,
-                itemCount: _articleData == null ? 1 : _articleData.length + 2,
+                itemCount: (_articleData == null || _articleData.datas == null)
+                    ? 1
+                    : _articleData.datas.length + 2,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return _buildBanner();
-                  } else if (index == _articleData.length + 1) {
+                  } else if (index == _articleData.datas.length + 1) {
                     return Container(
                       padding: EdgeInsets.all(16.0),
                       child: Row(
@@ -130,9 +131,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                       ),
                     );
                   }
-                  return _buildItem(
-                      PopularArticleBean.fromMap(_articleData[index - 1]),
-                      index - 1);
+                  return _buildItem(_articleData.datas[index - 1]);
                 }),
             onRefresh: _requestBanner),
       );
@@ -142,28 +141,29 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   Widget _buildBanner() {
     return PopularBannerWidget(
       bannerTitle: (index) {
-        return PopularBannerBean.fromMap(_bannerData[index]).title;
+        return _bannerData.data[index].title;
       },
-      bannerCount: _bannerData == null ? 0 : _bannerData.length,
+      bannerCount: _bannerData == null || _bannerData.data == null
+          ? 0
+          : _bannerData.data.length,
       buildBannerItem: (context, index) {
-        PopularBannerBean popularBannerBean =
-            PopularBannerBean.fromMap(_bannerData[index]);
+        BannerItem bannerItem = _bannerData.data[index];
         return Container(
           child: GestureDetector(
             onTap: () {
               Navigator.of(context)
                   .push(new MaterialPageRoute(builder: (context) {
                 return ArticleDetail(
-                  url: popularBannerBean.url,
-                  title: popularBannerBean.title,
-                  articleId: '${popularBannerBean.id}',
+                  url: bannerItem.url,
+                  title: bannerItem.title,
+                  articleId: '${bannerItem.id}',
                   isBannerArticle: true,
                 );
               }));
             },
             child: FadeInImage.memoryNetwork(
               placeholder: kTransparentImage,
-              image: popularBannerBean.imagePath,
+              image: bannerItem.imagePath,
               fit: BoxFit.cover,
             ),
           ),
@@ -172,7 +172,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     );
   }
 
-  Widget _buildItem(PopularArticleBean popularArticleBean, int index) {
+  Widget _buildItem(ArticleItem articleItem) {
     return Material(
       child: Card(
         elevation: 3.0,
@@ -180,10 +180,10 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
           onTap: () {
             Navigator.push(context, new MaterialPageRoute(builder: (context) {
               return ArticleDetail(
-                title: popularArticleBean.title,
-                url: popularArticleBean.link,
-                isCollection: popularArticleBean.collect,
-                articleId: '${popularArticleBean.id}',
+                title: articleItem.title,
+                url: articleItem.link,
+                isCollection: articleItem.collect,
+                articleId: '${articleItem.id}',
                 isBannerArticle: false,
               );
             }));
@@ -198,7 +198,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          '${popularArticleBean.title}',
+                          '${articleItem.title}',
                           style: TextStyle(fontSize: 18.0),
                         ),
                         Container(
@@ -206,13 +206,13 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                           child: Row(
                             children: <Widget>[
                               Text(
-                                '${popularArticleBean.niceDate}',
+                                '${articleItem.niceDate}',
                                 style: TextStyle(color: Colors.grey),
                               ),
                               Container(
                                 margin: EdgeInsets.only(left: 16.0),
                                 child: Text(
-                                  '来源：${popularArticleBean.author}',
+                                  '来源：${articleItem.author}',
                                   style: TextStyle(color: Colors.grey),
                                 ),
                               )
@@ -225,14 +225,13 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                   flex: 1,
                   child: GestureDetector(
                     onTap: () {
-                      _clickCollection(index);
+                      _clickCollection(articleItem);
                     },
                     child: Icon(
-                      popularArticleBean.collect
+                      articleItem.collect
                           ? Icons.favorite
                           : Icons.favorite_border,
-                      color:
-                          popularArticleBean.collect ? Colors.red : Colors.grey,
+                      color: articleItem.collect ? Colors.red : Colors.grey,
                     ),
                   ),
                 )
@@ -245,35 +244,34 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   }
 
   //收藏相关操作
-  _clickCollection(int index) async {
-    PopularArticleBean popularArticleBean =
-        PopularArticleBean.fromMap(_articleData[index]);
+  _clickCollection(ArticleItem articleItem) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
     if (isLogin != null && isLogin) {
-      if (popularArticleBean.collect) {
-        Response response = await ApiRequest.unCollectionWebsiteArticle(
-            '${popularArticleBean.id}');
+      if (articleItem.collect) {
+        Response response =
+            await ApiRequest.unCollectionWebsiteArticle('${articleItem.id}');
+
         print('KCrason UnCollection:${response.toString()}');
         final jsonResult = json.decode(response.toString());
         int errorCode = jsonResult['errorCode'];
         if (errorCode == 0) {
           setState(() {
-            popularArticleBean.collect = false;
+            articleItem.collect = false;
             SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '已取消收藏');
           });
         } else {
           SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '取消失败');
         }
       } else {
-        Response response = await ApiRequest.collectionWebsiteArticle(
-            '${popularArticleBean.id}');
+        Response response =
+            await ApiRequest.collectionWebsiteArticle('${articleItem.id}');
         print('KCrason Collection:${response.toString()}');
         final jsonResult = json.decode(response.toString());
         int errorCode = jsonResult['errorCode'];
         if (errorCode == 0) {
           setState(() {
-            popularArticleBean.collect = true;
+            articleItem.collect = true;
             SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏成功');
           });
         } else {
