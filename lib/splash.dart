@@ -14,8 +14,7 @@ class SplashWidget extends StatelessWidget {
     Future.delayed(Duration(seconds: 1), () {
       Navigator.of(context).pushAndRemoveUntil(
           new MaterialPageRoute(
-              builder: (context) =>
-                   MyApp()),
+              builder: (context) => MyApp()),
           (route) => false);
     });
   }

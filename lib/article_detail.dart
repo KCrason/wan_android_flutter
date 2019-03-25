@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'utils/app_route.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'utils/constant.dart';
-import 'user/login.dart';
-import 'package:dio/dio.dart';
-import 'package:wan_android_flutter/network/api_request.dart';
-import 'dart:convert';
 import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:wan_android_flutter/utils/collection_helper.dart';
 
 class ArticleDetail extends StatefulWidget {
   final String title;
@@ -54,42 +49,21 @@ class _ArticleDetailState extends State<ArticleDetail> {
 
   //收藏相关操作
   _clickCollection(String articleId) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
-    if (isLogin != null && isLogin) {
-      if (localCollectionState) {
-        Response response =
-            await ApiRequest.unCollectionWebsiteArticle(articleId);
-        print('KCrason UnCollection:${response.toString()}');
-        final jsonResult = json.decode(response.toString());
-        int errorCode = jsonResult['errorCode'];
-        if (errorCode == 0) {
-          setState(() {
-            this.localCollectionState = false;
-            SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '已取消收藏');
-          });
-        } else {
-          SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '取消失败');
-        }
-      } else {
-        Response response =
-            await ApiRequest.collectionWebsiteArticle(articleId);
-        print('KCrason Collection:${response.toString()}');
-        final jsonResult = json.decode(response.toString());
-        int errorCode = jsonResult['errorCode'];
-        if (errorCode == 0) {
-          setState(() {
-            this.localCollectionState = true;
-            SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏成功');
-          });
-        } else {
-          SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏失败');
-        }
-      }
+    CollectionHelper collectionHelper = new CollectionHelper();
+    if (localCollectionState) {
+      collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
+          (isOperateSuccess) {
+        setState(() {
+          this.localCollectionState = false;
+        });
+      }, int.parse(articleId));
     } else {
-      Navigator.push(context, new MaterialPageRoute(builder: (context) {
-        return Login();
-      }));
+      collectionHelper.collectionArticle(_scaffoldKey.currentState,
+          (isOperateSuccess) {
+        setState(() {
+          this.localCollectionState = true;
+        });
+      }, int.parse(articleId));
     }
   }
 
