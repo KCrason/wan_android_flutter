@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'article_detail.dart';
 
 class Discovery extends StatefulWidget {
   @override
@@ -10,18 +9,16 @@ class _DiscoveryState extends State<Discovery>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Center(
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('导航'),
+      ),
+      body: Center(
         child: GestureDetector(
           child: Text(
             'Discovery',
             textScaleFactor: 5,
           ),
-          onTap: () {
-            Navigator.push(context, new MaterialPageRoute(builder: (context) {
-              return ArticleDetail(url: 'www.baidu.com');
-            }));
-          },
         ),
       ),
     );

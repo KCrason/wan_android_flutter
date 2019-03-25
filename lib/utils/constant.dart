@@ -36,5 +36,7 @@ class Constants {
 
   static String preferenceKeyIsLogin = 'preferences_key_is_login';
 
+  static String preferenceKeyUserName = 'preferences_key_user_name';
+
   static String systemDataUrl = 'https://www.wanandroid.com/tree/json';
 }

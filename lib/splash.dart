@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'user/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 
 void main() {
@@ -13,8 +11,6 @@ void main() {
 
 class SplashWidget extends StatelessWidget {
   _intentPage(BuildContext context) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    bool isLogin = preferences.getBool('isLogin');
     Future.delayed(Duration(seconds: 1), () {
       Navigator.of(context).pushAndRemoveUntil(
           new MaterialPageRoute(

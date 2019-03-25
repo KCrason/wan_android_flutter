@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import 'package:cookie_jar/cookie_jar.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
+import 'package:wan_android_flutter/utils/snackbar_util.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -22,9 +19,10 @@ class _LoginState extends State<Login> {
   bool _isLogging = false;
 
   //保存登陆状态
-  _saveLoginState() async {
+  _saveLoginState(String userName) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setBool(Constants.preferenceKeyIsLogin, true);
+    await preferences.setString(Constants.preferenceKeyUserName, userName);
   }
 
   void _login() async {
@@ -33,16 +31,14 @@ class _LoginState extends State<Login> {
       final jsonResult = json.decode(response.toString());
       int errorCode = jsonResult['errorCode'];
       if (errorCode == 0) {
-        _saveLoginState();
+        _saveLoginState(jsonResult['data']['username']);
         Navigator.pop(context);
       } else {
         setState(() {
           _isLogging = false;
         });
-        _globalKey.currentState.showSnackBar(SnackBar(
-          content: Text('登陆失败：${jsonResult['errorMsg']}'),
-          duration: Duration(milliseconds: 500),
-        ));
+        SnackBarUtil.showShortSnackBar(
+            _globalKey.currentState, '登陆失败：${jsonResult['errorMsg']}');
       }
     });
   }
