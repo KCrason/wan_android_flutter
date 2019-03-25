@@ -9,7 +9,7 @@ class ProjectClassifyTabBean {
   ProjectClassifyTabBean({this.data});
 
   factory ProjectClassifyTabBean.fromJson(Map<String, dynamic> json) {
-    return _$ProjectClassifyBeanFromJson(json);
+    return _$ProjectClassifyTabBeanFromJson(json);
   }
 }
 
@@ -22,6 +22,6 @@ class ProjectClassifyTabItem {
   ProjectClassifyTabItem({this.name, this.courseId, this.id});
 
   factory ProjectClassifyTabItem.fromJson(Map<String, dynamic> json) {
-    return _$ProjectClassifyItemFromJson(json);
+    return _$ProjectClassifyTabItemFromJson(json);
   }
 }

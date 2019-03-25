@@ -3,6 +3,10 @@ import 'package:wan_android_flutter/network/api_request.dart';
 import 'package:wan_android_flutter/network/article_bean.dart';
 import 'package:dio/dio.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:wan_android_flutter/widgets/list_view_widget.dart';
+import 'package:wan_android_flutter/utils/log_util.dart';
+import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
+import 'package:wan_android_flutter/utils/collection_helper.dart';
 
 class ProjectClassifyItemPage extends StatefulWidget {
   final String projectTabName;
@@ -12,51 +16,81 @@ class ProjectClassifyItemPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ProjectClassifyItemPageState createState() =>
-      _ProjectClassifyItemPageState();
+  State<StatefulWidget> createState() => _ProjectClassifyItemPageState();
 }
 
 class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
   int mCurrentPage = 1;
   List<ArticleItem> _articleItems = new List();
+  bool _isLoadComplete = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  final ScrollController _scrollController = new ScrollController();
-
-  bool isLoadMore = false;
+  MultiStatus _multiStatus = MultiStatus.loading;
 
   @override
   void initState() {
     super.initState();
-    _requestData();
-    _scrollController.addListener(() {
-      if (_scrollController.offset ==
-              _scrollController.position.maxScrollExtent &&
-          !isLoadMore) {
-        _loadMore();
+    _refreshData();
+  }
+
+  _retryRefresh() {
+    setState(() {
+      _multiStatus = MultiStatus.loading;
+    });
+    _refreshData();
+  }
+
+  Future<void> _refreshData() async {
+    ApiRequest.getProjectClassifyListData(widget.projectTabId, mCurrentPage)
+        .then((response) {
+      ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
+      if (articleBean.total == 0) {
+        setState(() {
+          _multiStatus = MultiStatus.empty;
+        });
+      } else {
+        if (articleBean == null || articleBean.datas == null) {
+          setState(() {
+            _multiStatus = MultiStatus.error;
+          });
+        } else {
+          _articleItems = articleBean.datas;
+          _multiStatus = MultiStatus.normal;
+          _setLoadCompleteState(articleBean);
+        }
+      }
+    }).catchError((error) {
+      setState(() {
+        _multiStatus = MultiStatus.error;
+      });
+    });
+  }
+
+  _setLoadCompleteState(ArticleBean articleBean) {
+    setState(() {
+      if (articleBean.total == _articleItems.length) {
+        _isLoadComplete = true;
       }
     });
   }
 
-  Future<Null> _requestData() async {
-    isLoadMore = false;
+  Future<void> _loadMore() async {
+    mCurrentPage++;
     Response response = await ApiRequest.getProjectClassifyListData(
         widget.projectTabId, mCurrentPage);
     ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
-    setState(() {
-      _articleItems = articleBean.datas;
-    });
+    _articleItems.addAll(articleBean.datas);
+    _setLoadCompleteState(articleBean);
   }
 
-  _loadMore() async {
-    mCurrentPage++;
-    isLoadMore = true;
-    Response response = await ApiRequest.getProjectClassifyListData(
-        widget.projectTabId, mCurrentPage);
-    ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
-    setState(() {
-      isLoadMore = false;
-      _articleItems.addAll(articleBean.datas);
-    });
+  _onLoadMoreError(String errorMessage) {
+    LogUtil.printLog(errorMessage);
+    if (mCurrentPage > 1) {
+      mCurrentPage--;
+      if (mCurrentPage < 1) {
+        mCurrentPage = 1;
+      }
+    }
   }
 
   Widget _buildItem(ArticleItem articleItem) {
@@ -127,13 +161,18 @@ class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
                             ],
                           ),
                         ),
-                        Icon(
-                            articleItem.collect
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: articleItem.collect
-                                ? Colors.red
-                                : Colors.black38),
+                        GestureDetector(
+                          onTap: () {
+                            _clickCollection(articleItem);
+                          },
+                          child: Icon(
+                              articleItem.collect
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: articleItem.collect
+                                  ? Colors.red
+                                  : Colors.black38),
+                        )
                       ],
                     ),
                   ],
@@ -147,48 +186,45 @@ class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
     );
   }
 
+  //收藏相关操作
+  _clickCollection(ArticleItem articleItem) async {
+    CollectionHelper _collectionHelper = new CollectionHelper();
+    if (articleItem.collect) {
+      _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
+          (isOperateSuccess) {
+        setState(() {
+          articleItem.collect = false;
+        });
+      }, articleItem.id);
+    } else {
+      _collectionHelper.collectionArticle(_scaffoldKey.currentState,
+          (isOperateSuccess) {
+        setState(() {
+          articleItem.collect = true;
+        });
+      }, articleItem.id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-//    return ListView.builder(
-//        itemCount: _articleItems == null ? 0 : _articleItems.length,
-//        itemBuilder: (context, index) {
-//          return _buildItem(_articleItems[index]);
-//        });
-
-    return RefreshIndicator(
-        child: ListView.builder(
-          itemCount: _articleItems == null || _articleItems.length == 0
-              ? 0
-              : _articleItems.length + 1,
-          controller: _scrollController,
-          itemBuilder: (context, index) {
-            if (index < _articleItems.length) {
-              return _buildItem(_articleItems[index]);
-            }
-            return Container(
-              padding: EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: 12.0),
-                    child: Text(
-                      '正在加载...',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  )
-                ],
-              ),
-            );
-          },
-        ),
-        onRefresh: _requestData);
+    return Scaffold(
+      key: _scaffoldKey,
+      body: RefreshIndicator(
+          child: MultiStatusPageWidget(
+            multiStatus: _multiStatus,
+            refreshCallback: _retryRefresh,
+            child: ListViewWidget(
+              itemCount: _articleItems == null || _articleItems.length == 0
+                  ? 0
+                  : _articleItems.length,
+              itemBuilder: (context, index) => _buildItem(_articleItems[index]),
+              loadMore: _loadMore,
+              loadMoreError: _onLoadMoreError,
+              isLoadComplete: _isLoadComplete,
+            ),
+          ),
+          onRefresh: _refreshData),
+    );
   }
 }

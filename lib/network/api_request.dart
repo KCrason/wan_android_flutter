@@ -59,10 +59,12 @@ class ApiRequest {
   //获取项目分类列表数据
   static Future<Response> getProjectClassifyListData(
       int classifyId, int curPage) async {
-    return await Dio()
-        .get(Constants.generateProjectListDataUrl(classifyId, curPage));
+    return await Dio().get(
+        Constants.generateProjectListDataUrl(classifyId, curPage),
+        options: _getOptions(await getCookieJar()));
   }
 
+  //取出cookie数据添加请求头
   static _getOptions(PersistCookieJar persistCookieJar) {
     List<Cookie> cookies =
         persistCookieJar.loadForRequest(Uri.parse(Constants.loginUrl));

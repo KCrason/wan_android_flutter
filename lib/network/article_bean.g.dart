@@ -11,10 +11,9 @@ ArticleBean _$ArticleBeanFromJson(Map<String, dynamic> json) {
       curPage: json['curPage'] as int,
       total: json['total'] as int,
       datas: (json['datas'] as List)
-          ?.map((e) =>
-      e == null
-          ? null
-          : ArticleItem.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => e == null
+              ? null
+              : ArticleItem.fromJson(e as Map<String, dynamic>))
           ?.toList());
 }
 
@@ -46,5 +45,5 @@ Map<String, dynamic> _$ArticleItemToJson(ArticleItem instance) =>
       'title': instance.title,
       'id': instance.id,
       'envelopePic': instance.envelopePic,
-      'desc': instance.desc,
+      'desc': instance.desc
     };

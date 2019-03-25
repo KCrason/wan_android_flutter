@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
 import 'package:wan_android_flutter/utils/snackbar_util.dart';
 import 'package:wan_android_flutter/user/login.dart';
+import 'package:wan_android_flutter/utils/collection_helper.dart';
 
 //头条
 class Popular extends StatefulWidget {
@@ -36,7 +37,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     isLoadMore = true;
     ApiRequest.getPopularListData(_curPage).then((responseArticle) {
       ArticleBean newArticleData =
-      ArticleBean.fromJson(responseArticle.data['data']);
+          ArticleBean.fromJson(responseArticle.data['data']);
       setState(() {
         isLoadMore = false;
         _articleData.datas.addAll(newArticleData.datas);
@@ -52,8 +53,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
       Response responseArticle = await ApiRequest.getPopularListData(_curPage);
       setState(() {
         _bannerData = PopularBannerBean.fromJson(responseBanner.data);
-        _articleData =
-            ArticleBean.fromJson(responseArticle.data['data']);
+        _articleData = ArticleBean.fromJson(responseArticle.data['data']);
       });
     } catch (e) {
       print(e);
@@ -245,43 +245,21 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
 
   //收藏相关操作
   _clickCollection(ArticleItem articleItem) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
-    if (isLogin != null && isLogin) {
-      if (articleItem.collect) {
-        Response response =
-            await ApiRequest.unCollectionWebsiteArticle('${articleItem.id}');
-
-        print('KCrason UnCollection:${response.toString()}');
-        final jsonResult = json.decode(response.toString());
-        int errorCode = jsonResult['errorCode'];
-        if (errorCode == 0) {
-          setState(() {
-            articleItem.collect = false;
-            SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '已取消收藏');
-          });
-        } else {
-          SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '取消失败');
-        }
-      } else {
-        Response response =
-            await ApiRequest.collectionWebsiteArticle('${articleItem.id}');
-        print('KCrason Collection:${response.toString()}');
-        final jsonResult = json.decode(response.toString());
-        int errorCode = jsonResult['errorCode'];
-        if (errorCode == 0) {
-          setState(() {
-            articleItem.collect = true;
-            SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏成功');
-          });
-        } else {
-          SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '收藏失败');
-        }
-      }
+    CollectionHelper _collectionHelper = new CollectionHelper();
+    if (articleItem.collect) {
+      _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
+          (isOperateSuccess) {
+        setState(() {
+          articleItem.collect = false;
+        });
+      }, articleItem.id);
     } else {
-      Navigator.push(context, new MaterialPageRoute(builder: (context) {
-        return Login();
-      }));
+      _collectionHelper.collectionArticle(_scaffoldKey.currentState,
+          (isOperateSuccess) {
+        setState(() {
+          articleItem.collect = true;
+        });
+      }, articleItem.id);
     }
   }
 
