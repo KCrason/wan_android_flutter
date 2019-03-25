@@ -64,6 +64,16 @@ class ApiRequest {
         options: _getOptions(await getCookieJar()));
   }
 
+  static Future<Response> getSystemData() async {
+    return await Dio().get(Constants.systemDataUrl);
+  }
+
+  static Future<Response> getSystemArticleListData(int classifyId, int curPage) async{
+    return await Dio().get(
+        Constants.generateSystemArticleListDataUrl(classifyId, curPage),
+        options: _getOptions(await getCookieJar()));
+  }
+
   //取出cookie数据添加请求头
   static _getOptions(PersistCookieJar persistCookieJar) {
     List<Cookie> cookies =

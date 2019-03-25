@@ -26,9 +26,15 @@ class Constants {
     return 'https://www.wanandroid.com/project/list/$curPage/json?cid=$classifyId';
   }
 
+  static String generateSystemArticleListDataUrl(int classifyId, int curPage) {
+    return 'https://www.wanandroid.com/article/list/$curPage/json?cid=$classifyId';
+  }
+
   static String loginUrl = 'https://www.wanandroid.com/user/login';
 
   static String registerUrl = 'https://www.wanandroid.com/user/register';
 
   static String preferenceKeyIsLogin = 'preferences_key_is_login';
+
+  static String systemDataUrl = 'https://www.wanandroid.com/tree/json';
 }
