@@ -11,6 +11,9 @@ class System extends StatefulWidget {
 }
 
 class _SystemState extends State<System> with AutomaticKeepAliveClientMixin {
+
+  SystemBean _systemBean;
+
   _buildItem(SystemItemBean systemItemBean) {
     return Card(
       child: ListTile(
@@ -41,6 +44,13 @@ class _SystemState extends State<System> with AutomaticKeepAliveClientMixin {
     return subTile;
   }
 
+  Future<void> _refresh() async {
+    Response response = await ApiRequest.getSystemData();
+    setState(() {
+      _systemBean = SystemBean.fromJson(response.data);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,13 +58,17 @@ class _SystemState extends State<System> with AutomaticKeepAliveClientMixin {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             Response response = snapshot.data;
-            SystemBean systemBean = SystemBean.fromJson(response.data);
-            return ListView.builder(
-              itemBuilder: (context, index) {
-                return _buildItem(systemBean.data[index]);
-              },
-              itemCount: systemBean.data.length,
-            );
+            _systemBean = SystemBean.fromJson(response.data);
+            return RefreshIndicator(
+                child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    return _buildItem(_systemBean.data[index]);
+                  },
+                  itemCount: _systemBean == null || _systemBean.data == null
+                      ? 0
+                      : _systemBean.data.length,
+                ),
+                onRefresh: _refresh);
           } else {
             return Center(
               child: CircularProgressIndicator(),

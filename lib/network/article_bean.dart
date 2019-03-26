@@ -28,6 +28,7 @@ class ArticleItem {
   int id;
   String envelopePic;
   String desc;
+  int originId;
 
   ArticleItem(
       {this.title,
@@ -36,7 +37,7 @@ class ArticleItem {
       this.link,
       this.niceDate,
       this.id,
-      this.envelopePic,this.desc});
+      this.envelopePic,this.desc,this.originId});
 
   factory ArticleItem.fromJson(Map<String, dynamic> json) =>
       _$ArticleItemFromJson(json);

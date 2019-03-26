@@ -163,7 +163,8 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
                   flex: 1,
                   child: GestureDetector(
                     onTap: () {
-                      _clickUnCollection(articleItem.id, index);
+                      _clickUnCollection(
+                          articleItem.id, index, articleItem.originId);
                     },
                     child: Icon(
                       Icons.favorite,
@@ -180,13 +181,13 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
   }
 
   //收藏相关操作
-  _clickUnCollection(int articleId, int index) async {
+  _clickUnCollection(int articleId, int index, int originId) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
-    _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
-        (isOperateSuccess) {
+    _collectionHelper.unCollectionArticleForMyCollectionPage(
+        _scaffoldKey.currentState, (isOperateSuccess) {
       setState(() {
         _articleData.datas.removeAt(index);
       });
-    }, articleId);
+    }, articleId, originId);
   }
 }

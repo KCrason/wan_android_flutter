@@ -47,6 +47,15 @@ class ApiRequest {
         options: _getOptions(await getCookieJar()));
   }
 
+  //取消收藏
+  static Future<Response> unCollectionWebsiteArticleForMyCollectionPage(
+      int articleId, int originId) async {
+    return await Dio().post(
+        Constants.unCollectionForMyCollectionPage(articleId),
+        options: _getOptions(await getCookieJar()),
+        data: FormData.from({'originId': originId}));
+  }
+
   //获取项目分类tab
   static void getProjectClassifyTabData(Function callback) async {
     return await Dio().get(Constants.projectClassifyTabUrl).then((result) {
@@ -94,6 +103,12 @@ class ApiRequest {
   static Future<Response> getMyCollectionData(int curPage) async {
     return await Dio().get(Constants.generateMyCollectionDataUrl(curPage),
         options: _getOptions(await getCookieJar()));
+  }
+
+  static Future<Response> search(String keyWord, int curPage) async {
+    return await Dio().post(Constants.generateSearchDataUrl(curPage),
+        options: _getOptions(await getCookieJar()),
+        data: FormData.from({'k': keyWord}));
   }
 
   //取出cookie数据添加请求头

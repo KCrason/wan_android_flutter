@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wan_android_flutter/utils/constant.dart';
 import 'package:wan_android_flutter/my_collection_page.dart';
+import 'utils/user_helper.dart';
 
 class Me extends StatefulWidget {
   @override
@@ -10,22 +9,17 @@ class Me extends StatefulWidget {
 }
 
 class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
-  String _userName = '';
+  String _userName = '还未登陆，点击登陆';
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    SharedPreferences.getInstance().then((preferences) {
-      setState(() {
-        dynamic _localUserName =
-            preferences.get(Constants.preferenceKeyUserName);
-        if (_localUserName != null) {
-          setState(() {
-            _userName = _localUserName;
-          });
-        }
-      });
+    UserHelper.getUserName().then((username) {
+      if (username != null) {
+        setState(() {
+          _userName = username;
+        });
+      }
     });
   }
 
@@ -47,18 +41,26 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
                       width: 90,
                       height: 90,
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                            "http://img8.zol.com.cn/bbs/upload/23765/23764201.jpg"),
+                        backgroundImage: AssetImage('images/flutter.jpg'),
                         backgroundColor: Colors.grey,
                       ),
                     ),
                     alignment: Alignment(0, -0.5),
                   ),
                   Padding(
-                    child: Text(
-                      _userName,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    child: GestureDetector(
+                      onTap: () {
+                        UserHelper.isLogin().then((result) {
+                          if (result == null || !result) {
+                            UserHelper.toLogin(context);
+                          }
+                        });
+                      },
+                      child: Text(
+                        _userName,
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w400),
+                      ),
                     ),
                     padding: EdgeInsets.only(top: 16),
                   )
@@ -72,9 +74,16 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
               title: Text('我的收藏'),
               trailing: Icon(Icons.arrow_forward_ios),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return MyCollectionPage();
-                }));
+                UserHelper.isLogin().then((result) {
+                  if (result != null && result) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return MyCollectionPage();
+                    }));
+                  } else {
+                    UserHelper.toLogin(context);
+                  }
+                });
               },
             ),
           )

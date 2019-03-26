@@ -26,14 +26,16 @@ Map<String, dynamic> _$ArticleBeanToJson(ArticleBean instance) =>
 
 ArticleItem _$ArticleItemFromJson(Map<String, dynamic> json) {
   return ArticleItem(
-      title: json['title'] as String,
-      author: json['author'] as String,
-      collect: json['collect'] as bool,
-      link: json['link'] as String,
-      niceDate: json['niceDate'] as String,
-      id: json['id'] as int,
-      envelopePic: json['envelopePic'] as String,
-      desc: json['desc'] as String);
+    title: json['title'] as String,
+    author: json['author'] as String,
+    collect: json['collect'] as bool,
+    link: json['link'] as String,
+    niceDate: json['niceDate'] as String,
+    id: json['id'] as int,
+    envelopePic: json['envelopePic'] as String,
+    desc: json['desc'] as String,
+    originId: json['originId'] as int,
+  );
 }
 
 Map<String, dynamic> _$ArticleItemToJson(ArticleItem instance) =>
@@ -45,5 +47,6 @@ Map<String, dynamic> _$ArticleItemToJson(ArticleItem instance) =>
       'title': instance.title,
       'id': instance.id,
       'envelopePic': instance.envelopePic,
-      'desc': instance.desc
+      'desc': instance.desc,
+      'originId': instance.originId,
     };

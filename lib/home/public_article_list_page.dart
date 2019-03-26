@@ -24,6 +24,7 @@ class _PublicArticleListPageState extends State<PublicArticleListPage> {
   ArticleBean _articleData = new ArticleBean();
 
   _refresh() {
+    curPage = 1;
     ApiRequest.getPublicArticleListData(widget.publicId, curPage)
         .then((result) {
       _articleData = ArticleBean.fromJson(result.data['data']);
@@ -71,20 +72,22 @@ class _PublicArticleListPageState extends State<PublicArticleListPage> {
       appBar: AppBar(
         title: Text(widget.publicName),
       ),
-      body: MultiStatusPageWidget(
-        refreshCallback: _refresh,
-        multiStatus: _multiStatus,
-        child: ListViewWidget(
-          itemCount: _articleData == null || _articleData.datas == null
-              ? 0
-              : _articleData.datas.length,
-          itemBuilder: (context, index) {
-            return _buildItem(_articleData.datas[index]);
-          },
-          loadMore: _loadMore,
-          loadMoreError: _loadError,
-        ),
-      ),
+      body: RefreshIndicator(
+          child: MultiStatusPageWidget(
+            refreshCallback: _refresh,
+            multiStatus: _multiStatus,
+            child: ListViewWidget(
+              itemCount: _articleData == null || _articleData.datas == null
+                  ? 0
+                  : _articleData.datas.length,
+              itemBuilder: (context, index) {
+                return _buildItem(_articleData.datas[index]);
+              },
+              loadMore: _loadMore,
+              loadMoreError: _loadError,
+            ),
+          ),
+          onRefresh: _refresh),
     );
   }
 

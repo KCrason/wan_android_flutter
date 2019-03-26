@@ -17,6 +17,11 @@ class Constants {
     return 'https://www.wanandroid.com/lg/uncollect_originId/$articleId/json';
   }
 
+
+  static String unCollectionForMyCollectionPage(int articleId){
+    return 'https://www.wanandroid.com/lg/uncollect/$articleId/json';
+  }
+
 //  static String collectionOtherArticleUrl = 'https://www.wanandroid.com/lg/collect/add/json';
 
   static String projectClassifyTabUrl =
@@ -40,6 +45,10 @@ class Constants {
 
   static String generateMyCollectionDataUrl(int curPage){
     return 'https://www.wanandroid.com/lg/collect/list/$curPage/json';
+  }
+
+  static String generateSearchDataUrl(int curPage){
+    return 'https://www.wanandroid.com/article/query/$curPage/json';
   }
 
   static String loginUrl = 'https://www.wanandroid.com/user/login';

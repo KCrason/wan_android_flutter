@@ -74,22 +74,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   Widget getBody() {
     if (_articleData == null) {
       return new Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            CircularProgressIndicator(),
-            Container(
-              padding: EdgeInsets.only(top: 20.0),
-              child: Text(
-                '加载中...',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                ),
-              ),
-            )
-          ],
-        ),
+        child: CircularProgressIndicator(),
       );
     } else {
       return Container(
@@ -132,7 +117,6 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
       );
     }
   }
-
 
   Widget _buildBanner() {
     return PopularBannerWidget(
@@ -250,7 +234,6 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
-
 
   //收藏相关操作
   _clickCollection(ArticleItem articleItem) async {

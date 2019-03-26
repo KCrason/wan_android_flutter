@@ -11,10 +11,9 @@ void main() {
 
 class SplashWidget extends StatelessWidget {
   _intentPage(BuildContext context) async {
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(seconds: 3), () {
       Navigator.of(context).pushAndRemoveUntil(
-          new MaterialPageRoute(
-              builder: (context) => MyApp()),
+          new MaterialPageRoute(builder: (context) => MyApp()),
           (route) => false);
     });
   }
@@ -23,11 +22,10 @@ class SplashWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     _intentPage(context);
     return Container(
-      child: FadeInImage.memoryNetwork(
-          fit: BoxFit.cover,
-          placeholder: kTransparentImage,
-          image:
-              'https://i.pinimg.com/originals/1d/ac/ad/1dacad5d6eab950f547b693ca975c6db.jpg'),
+      decoration: BoxDecoration(
+          image: DecorationImage(
+              image: NetworkImage('https://source.unsplash.com/random'),
+              fit: BoxFit.cover)),
     );
   }
 }

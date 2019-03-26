@@ -19,7 +19,8 @@ class _DiscoveryState extends State<Discovery>
   MultiStatus _multiStatus = MultiStatus.loading;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  _refresh() {
+  Future<void> _refresh() async{
+    curPage = 0;
     ApiRequest.getNewArticle(curPage).then((result) {
       _articleData = ArticleBean.fromJson(result.data['data']);
       setState(() {
@@ -65,20 +66,22 @@ class _DiscoveryState extends State<Discovery>
       appBar: AppBar(
         title: Text('最新项目'),
       ),
-      body: MultiStatusPageWidget(
-        refreshCallback: _refresh,
-        child: ListViewWidget(
-          itemCount: _articleData == null || _articleData.datas == null
-              ? 0
-              : _articleData.datas.length,
-          itemBuilder: (context, index) {
-            return _buildItem(_articleData.datas[index]);
-          },
-          loadMore: _loadMore,
-          loadMoreError: _loadError,
-        ),
-        multiStatus: _multiStatus,
-      ),
+      body: RefreshIndicator(
+          child: MultiStatusPageWidget(
+            refreshCallback: _refresh,
+            child: ListViewWidget(
+              itemCount: _articleData == null || _articleData.datas == null
+                  ? 0
+                  : _articleData.datas.length,
+              itemBuilder: (context, index) {
+                return _buildItem(_articleData.datas[index]);
+              },
+              loadMore: _loadMore,
+              loadMoreError: _loadError,
+            ),
+            multiStatus: _multiStatus,
+          ),
+          onRefresh: _refresh),
     );
   }
 

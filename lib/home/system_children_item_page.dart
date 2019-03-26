@@ -41,6 +41,7 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
   }
 
   Future<void> _refreshData() async {
+    mCurrentPage = 0;
     ApiRequest.getSystemArticleListData(widget.projectTabId, mCurrentPage)
         .then((response) {
       ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
