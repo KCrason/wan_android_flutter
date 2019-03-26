@@ -32,7 +32,7 @@ class _HomePageState extends State<Home>
               alignment: Alignment.center,
               height: 36.0,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.black12,
                 borderRadius: BorderRadius.all(Radius.circular(6.0)),
               ),
               child: Row(

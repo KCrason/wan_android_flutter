@@ -133,7 +133,6 @@ class _ArticleDetailState extends State<ArticleDetail> {
               },
               child: Icon(
                 Icons.more_vert,
-                color: Colors.white,
               ),
             ),
           )

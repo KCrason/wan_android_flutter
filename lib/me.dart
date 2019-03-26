@@ -123,13 +123,15 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
             child: Card(
                 margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
                 color: Colors.red,
-                child: GestureDetector(
+                child: InkWell(
                   child: Container(
                     height: 48.0,
+                    width: window.physicalSize.width,
                     child: Center(
                       child: Text(
                         '退出登陆',
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w400,color: Colors.white),
                       ),
                     ),
                   ),

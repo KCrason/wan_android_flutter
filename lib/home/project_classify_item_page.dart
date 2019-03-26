@@ -7,7 +7,7 @@ import 'package:wan_android_flutter/widgets/list_view_widget.dart';
 import 'package:wan_android_flutter/utils/log_util.dart';
 import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
-
+import 'package:wan_android_flutter/article_detail.dart';
 class ProjectClassifyItemPage extends StatefulWidget {
   final String projectTabName;
   final int projectTabId;
@@ -97,7 +97,7 @@ class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
 
   Widget _buildItem(ArticleItem articleItem) {
     return Card(
-      child: Padding(
+      child: InkWell(child: Padding(
         padding: EdgeInsets.all(12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,14 +127,14 @@ class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
                             style: TextStyle(fontSize: 18, color: Colors.black),
                           ),
                           padding:
-                              EdgeInsets.only(left: 12, right: 12, bottom: 8),
+                          EdgeInsets.only(left: 12, right: 12, bottom: 8),
                         ),
                         Padding(
                           padding: EdgeInsets.only(left: 12, right: 12),
                           child: Text(
                             articleItem.desc,
                             style:
-                                TextStyle(fontSize: 14, color: Colors.black38),
+                            TextStyle(fontSize: 14, color: Colors.black38),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -184,7 +184,17 @@ class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
             )
           ],
         ),
-      ),
+      ),onTap: (){
+        Navigator.push(context, new MaterialPageRoute(builder: (context) {
+          return ArticleDetail(
+            title: articleItem.title,
+            url: articleItem.link,
+            isCollection: articleItem.collect,
+            articleId: '${articleItem.id}',
+            isBannerArticle: false,
+          );
+        }));
+      },),
     );
   }
 

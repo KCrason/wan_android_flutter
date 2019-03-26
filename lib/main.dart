@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
+      theme: ThemeData(primaryColor: Colors.white),
       home: MyHomePage(),
     );
   }
@@ -64,31 +64,31 @@ class _MyHomePageState extends State<MyHomePage>
               icon: Icon(Icons.home),
               title: _currentIndex == 0
                   ? Text('首页',
-                      style: TextStyle(color: Theme.of(context).primaryColor))
+                      style: TextStyle(color: Colors.blue))
                   : Text('首页'),
               activeIcon: Icon(
                 Icons.home,
-                color: Theme.of(context).primaryColor,
+                color: Colors.blue,
               )),
           BottomNavigationBarItem(
               icon: Icon(Icons.explore),
               title: _currentIndex == 1
                   ? Text('导航',
-                      style: TextStyle(color: Theme.of(context).primaryColor))
+                      style: TextStyle(color: Colors.blue))
                   : Text('导航'),
               activeIcon: Icon(
                 Icons.explore,
-                color: Theme.of(context).primaryColor,
+                color: Colors.blue,
               )),
           BottomNavigationBarItem(
               icon: Icon(Icons.group),
               title: _currentIndex == 2
                   ? Text('我的',
-                      style: TextStyle(color: Theme.of(context).primaryColor))
+                      style: TextStyle(color:Colors.blue))
                   : Text('我的'),
               activeIcon: Icon(
                 Icons.group,
-                color: Theme.of(context).primaryColor,
+                color: Colors.blue,
               )),
         ],
         currentIndex: _currentIndex,

@@ -52,7 +52,7 @@ class _ProjectState extends State<Project>
         child: RaisedButton(
           elevation: 0,
           color: _currentIndex == index
-              ? Theme.of(context).primaryColor
+              ? Colors.blue
               : Colors.grey,
           textColor: Colors.white,
           onPressed: () {

@@ -7,7 +7,6 @@ import 'package:wan_android_flutter/network/project_classfiy_tab_bean.dart';
 import 'package:random_color/random_color.dart';
 import 'package:wan_android_flutter/home/public_article_list_page.dart';
 
-
 class Public extends StatefulWidget {
   @override
   _PublicState createState() => _PublicState();
@@ -27,19 +26,21 @@ class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
   void _refresh() {
     ApiRequest.getPublicTabData().then((result) {
       ProjectClassifyTabBean projectClassifyTabBean =
-      ProjectClassifyTabBean.fromJson(result.data);
+          ProjectClassifyTabBean.fromJson(result.data);
       projectClassifyTabBean.data.forEach((projectClassifyTabItem) {
         widgets.add(new RaisedButton(
+            color: Colors.white,
             onPressed: () {
               Navigator.push(context, new MaterialPageRoute(builder: (context) {
                 return PublicArticleListPage(
                   publicId: projectClassifyTabItem.id,
-                  publicName: projectClassifyTabItem.name,);
+                  publicName: projectClassifyTabItem.name,
+                );
               }));
             },
             child: Text(
               '${projectClassifyTabItem.name}',
-              style: TextStyle(color: RandomColor().randomColor()),
+              style: TextStyle(color: Colors.black),
             )));
       });
       setState(() {
