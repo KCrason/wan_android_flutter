@@ -7,6 +7,7 @@ import 'package:wan_android_flutter/utils/log_util.dart';
 import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
 import 'package:wan_android_flutter/article_detail.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class SystemChildrenItemPage extends StatefulWidget {
   final String projectTabName;
@@ -42,6 +43,7 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
 
   Future<void> _refreshData() async {
     mCurrentPage = 0;
+    _isLoadComplete = false;
     ApiRequest.getSystemArticleListData(widget.projectTabId, mCurrentPage)
         .then((response) {
       ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
@@ -94,32 +96,91 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
     }
   }
 
+
+
   Widget _buildItem(ArticleItem articleItem) {
-    return Card(
-      child: ListTile(
-        title: Text(articleItem.title),
-        subtitle: Text(articleItem.desc),
-        trailing: GestureDetector(
+    return Material(
+      child: Card(
+        child: InkWell(
           onTap: () {
-            _clickCollection(articleItem);
-          },
-          child: Icon(
-              articleItem.collect ? Icons.favorite : Icons.favorite_border,
-              color: articleItem.collect ? Colors.red : Colors.black38),
-        ),
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            return ArticleDetail(
-                url: articleItem.link,
-                articleId: '${articleItem.id}',
+            Navigator.push(context, new MaterialPageRoute(builder: (context) {
+              return ArticleDetail(
                 title: articleItem.title,
+                url: articleItem.link,
                 isCollection: articleItem.collect,
-                isBannerArticle: false);
-          }));
-        },
+                articleId: '${articleItem.id}',
+                isBannerArticle: false,
+              );
+            }));
+          },
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            child: Row(
+              children: <Widget>[
+                Offstage(
+                  offstage: articleItem.envelopePic.isEmpty,
+                  child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: FadeInImage.memoryNetwork(
+                            placeholder: kTransparentImage,
+                            image: articleItem.envelopePic,
+                            fit: BoxFit.cover,
+                          ))),
+                ),
+                Expanded(
+                    flex: 9,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          '${articleItem.title}',
+                          style: TextStyle(fontSize: 18.0),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 6.0),
+                          child: Row(
+                            children: <Widget>[
+                              Text(
+                                '${articleItem.niceDate}',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(left: 16.0),
+                                child: Text(
+                                  '来源：${articleItem.author}',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    onTap: () {
+                      _clickCollection(articleItem);
+                    },
+                    child: Icon(
+                      articleItem.collect
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: articleItem.collect ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
+
 
   //收藏相关操作
   _clickCollection(ArticleItem articleItem) async {

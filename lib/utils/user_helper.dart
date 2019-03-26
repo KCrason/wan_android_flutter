@@ -2,6 +2,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:wan_android_flutter/user/login.dart';
+import 'package:wan_android_flutter/user/register.dart';
+import 'package:wan_android_flutter/network/api_request.dart';
+import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:cookie_jar/cookie_jar.dart';
 
 class UserHelper {
   static Future<SharedPreferences> getSharedPreferences() async {
@@ -18,12 +22,40 @@ class UserHelper {
 
   static Future<bool> isLogin() async {
     SharedPreferences sharedPreferences = await getSharedPreferences();
-    return sharedPreferences.get(Constants.preferenceKeyIsLogin);
+    bool isLogin = sharedPreferences.get(Constants.preferenceKeyIsLogin);
+    return isLogin == null ? false : isLogin;
   }
 
   static void toLogin(BuildContext context) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return Login();
     }));
+  }
+
+  static void toRegister(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return Register();
+    }));
+  }
+
+  static void loginOut(ScaffoldState scaffoldState, Function callBack) async {
+    SharedPreferences preferences = await getSharedPreferences();
+    PersistCookieJar persistCookieJar = await ApiRequest.getCookieJar();
+    ApiRequest.loginOut().then((result) {
+      int errorCode = result.data['errorCode'];
+      if (errorCode == 0) {
+        preferences.clear();
+        persistCookieJar.deleteAll();
+        SnackBarUtil.showShortSnackBar(scaffoldState, '已退出');
+        if (callBack != null) {
+          callBack();
+        }
+      } else {
+        SnackBarUtil.showShortSnackBar(
+            scaffoldState, '退出失败:${result.data['errorMessage']}');
+      }
+    }).catchError(() {
+      SnackBarUtil.showShortSnackBar(scaffoldState, '退出失败');
+    });
   }
 }

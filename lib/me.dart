@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:wan_android_flutter/my_collection_page.dart';
 import 'utils/user_helper.dart';
+import 'events/user_login_event.dart';
+import 'dart:async';
 
 class Me extends StatefulWidget {
   @override
@@ -11,9 +13,33 @@ class Me extends StatefulWidget {
 class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
   String _userName = '还未登陆，点击登陆';
 
+  final _globalKey = new GlobalKey<ScaffoldState>();
+
+  bool _isLogin = false;
+
+  StreamSubscription _streamSubscription;
+
   @override
   void initState() {
     super.initState();
+    isLogin();
+    getUserName();
+    _streamSubscription = eventBus.on<UserLoginEvent>().listen((event) {
+      if (event.isLoginSuccess) {
+        _isLogin = true;
+        getUserName();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _streamSubscription.cancel();
+  }
+
+  void getUserName() {
     UserHelper.getUserName().then((username) {
       if (username != null) {
         setState(() {
@@ -23,9 +49,14 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
     });
   }
 
+  void isLogin() async {
+    _isLogin = await UserHelper.isLogin();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _globalKey,
       appBar: AppBar(
         title: Text('我的'),
       ),
@@ -86,6 +117,31 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
                 });
               },
             ),
+          ),
+          Offstage(
+            offstage: !_isLogin,
+            child: Card(
+                margin: const EdgeInsets.only(top: 50, left: 20, right: 20),
+                color: Colors.red,
+                child: GestureDetector(
+                  child: Container(
+                    height: 48.0,
+                    child: Center(
+                      child: Text(
+                        '退出登陆',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    UserHelper.loginOut(_globalKey.currentState, () {
+                      setState(() {
+                        _isLogin = false;
+                        _userName = '还未登陆，点击登陆';
+                      });
+                    });
+                  },
+                )),
           )
         ],
       ),

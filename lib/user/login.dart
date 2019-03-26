@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
 import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:wan_android_flutter/utils/user_helper.dart';
+import 'package:wan_android_flutter/events/user_login_event.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -23,6 +25,7 @@ class _LoginState extends State<Login> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setBool(Constants.preferenceKeyIsLogin, true);
     await preferences.setString(Constants.preferenceKeyUserName, userName);
+    eventBus.fire(UserLoginEvent(isLoginSuccess: true));
   }
 
   void _login() async {
@@ -80,9 +83,14 @@ class _LoginState extends State<Login> {
             Container(
               margin: EdgeInsets.only(top: 16.0, right: 16.0),
               child: Align(
-                child: Text(
-                  '立即注册',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
+                child: GestureDetector(
+                  onTap: () {
+                    UserHelper.toRegister(context);
+                  },
+                  child: Text(
+                    '立即注册',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
                 ),
                 alignment: FractionalOffset.centerRight,
               ),

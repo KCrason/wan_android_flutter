@@ -41,6 +41,8 @@ class _ProjectClassifyItemPageState extends State<ProjectClassifyItemPage> {
   }
 
   Future<void> _refreshData() async {
+    mCurrentPage = 1;
+    _isLoadComplete = false;
     ApiRequest.getProjectClassifyListData(widget.projectTabId, mCurrentPage)
         .then((response) {
       ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);

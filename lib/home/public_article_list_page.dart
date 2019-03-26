@@ -23,7 +23,7 @@ class _PublicArticleListPageState extends State<PublicArticleListPage> {
   int curPage = 1;
   ArticleBean _articleData = new ArticleBean();
 
-  _refresh() {
+  Future<void> _refresh() async {
     curPage = 1;
     ApiRequest.getPublicArticleListData(widget.publicId, curPage)
         .then((result) {

@@ -16,6 +16,24 @@ class ApiRequest {
         data: FormData.from({'username': username, 'password': password}));
   }
 
+  //注册
+  static Future<Response> register(
+      String username, String password, String rePassword) async {
+    return await Dio().post(
+      Constants.registerUrl,
+      data: FormData.from({
+        'username': username,
+        'password': password,
+        'repassword': rePassword
+      }),
+    );
+  }
+
+  //退出登陆
+  static Future<Response> loginOut() async {
+    return await Dio().get(Constants.loginOutUrl);
+  }
+
   //获取banner数据
   static Future<Response> getBannerData() async {
     return await Dio().get(Constants.popularBannerUrl);

@@ -19,10 +19,11 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
   bool _isLoadComplete = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  _refresh() {
+  Future<void> _refresh() async {
+    curPage = 0;
+    _isLoadComplete =false;
     ApiRequest.getMyCollectionData(curPage).then((result) {
       _articleData = ArticleBean.fromJson(result.data['data']);
-
       if (_articleData == null ||
           _articleData.datas == null ||
           _articleData.datas.length == 0) {
@@ -80,21 +81,23 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
       appBar: AppBar(
         title: Text('我的收藏'),
       ),
-      body: MultiStatusPageWidget(
-        refreshCallback: _refresh,
-        child: ListViewWidget(
-          isLoadComplete: _isLoadComplete,
-          itemCount: _articleData == null || _articleData.datas == null
-              ? 0
-              : _articleData.datas.length,
-          itemBuilder: (context, index) {
-            return _buildItem(_articleData.datas[index], index);
-          },
-          loadMore: _loadMore,
-          loadMoreError: _loadError,
-        ),
-        multiStatus: _multiStatus,
-      ),
+      body: RefreshIndicator(
+          child: MultiStatusPageWidget(
+            refreshCallback: _refresh,
+            child: ListViewWidget(
+              isLoadComplete: _isLoadComplete,
+              itemCount: _articleData == null || _articleData.datas == null
+                  ? 0
+                  : _articleData.datas.length,
+              itemBuilder: (context, index) {
+                return _buildItem(_articleData.datas[index], index);
+              },
+              loadMore: _loadMore,
+              loadMoreError: _loadError,
+            ),
+            multiStatus: _multiStatus,
+          ),
+          onRefresh: _refresh),
     );
   }
 
