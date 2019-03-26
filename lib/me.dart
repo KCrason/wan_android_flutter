@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
+import 'package:wan_android_flutter/my_collection_page.dart';
 
 class Me extends StatefulWidget {
   @override
@@ -17,7 +18,8 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
     super.initState();
     SharedPreferences.getInstance().then((preferences) {
       setState(() {
-        dynamic _localUserName = preferences.get(Constants.preferenceKeyUserName);
+        dynamic _localUserName =
+            preferences.get(Constants.preferenceKeyUserName);
         if (_localUserName != null) {
           setState(() {
             _userName = _localUserName;
@@ -36,33 +38,46 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
       body: ListView(
         children: <Widget>[
           Container(
-            color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Align(
-                  child: SizedBox(
-                    width: 90,
-                    height: 90,
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          "http://img8.zol.com.cn/bbs/upload/23765/23764201.jpg"),
-                      backgroundColor: Colors.grey,
+            child: Card(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Align(
+                    child: SizedBox(
+                      width: 90,
+                      height: 90,
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                            "http://img8.zol.com.cn/bbs/upload/23765/23764201.jpg"),
+                        backgroundColor: Colors.grey,
+                      ),
                     ),
+                    alignment: Alignment(0, -0.5),
                   ),
-                  alignment: Alignment(0, -0.5),
-                ),
-                Padding(
-                  child: Text(
-                    _userName,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                  ),
-                  padding: EdgeInsets.only(top: 16),
-                )
-              ],
+                  Padding(
+                    child: Text(
+                      _userName,
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    ),
+                    padding: EdgeInsets.only(top: 16),
+                  )
+                ],
+              ),
             ),
             height: 250,
           ),
+          Card(
+            child: ListTile(
+              title: Text('我的收藏'),
+              trailing: Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return MyCollectionPage();
+                }));
+              },
+            ),
+          )
         ],
       ),
     );

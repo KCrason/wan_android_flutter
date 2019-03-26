@@ -8,21 +8,28 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+  TextEditingController _controller = new TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-//    insertSearch();
+    _controller.addListener(() {
+      String newText = _controller.text;
+    });
   }
 
   void insertSearch() async {
     var db = SqfHelper();
     await db.insertSearchHistory(SearchHistoryBean(
-        searchTime: DateTime.now().millisecondsSinceEpoch, searchWord: '尼玛傻逼1'));
+        searchTime: DateTime.now().millisecondsSinceEpoch,
+        searchWord: '尼玛傻逼1'));
     await db.insertSearchHistory(SearchHistoryBean(
-        searchTime: DateTime.now().millisecondsSinceEpoch, searchWord: '尼玛傻逼2'));
+        searchTime: DateTime.now().millisecondsSinceEpoch,
+        searchWord: '尼玛傻逼2'));
     await db.insertSearchHistory(SearchHistoryBean(
-        searchTime: DateTime.now().millisecondsSinceEpoch, searchWord: '尼玛傻逼3'));
+        searchTime: DateTime.now().millisecondsSinceEpoch,
+        searchWord: '尼玛傻逼3'));
 
     List searchBeans = await db.queryAllSearchHistory();
 
@@ -50,9 +57,13 @@ class _SearchState extends State<Search> {
             borderRadius: BorderRadius.all(Radius.circular(6.0)),
           ),
           child: TextFormField(
+            controller: _controller,
             decoration: InputDecoration.collapsed(
               hintText: '请输入你要搜索的内容',
             ),
+            onFieldSubmitted: (value) {
+              print('ValueChange:$value');
+            },
           ),
         ),
       ),

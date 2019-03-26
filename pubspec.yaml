@@ -35,6 +35,7 @@ dependencies:
   url_launcher: ^5.0.2
   json_annotation: ^2.0.0
   event_bus: ^1.0.3
+  random_color: ^1.0.3
 
 dev_dependencies:
   flutter_test:

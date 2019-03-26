@@ -30,9 +30,24 @@ class Constants {
     return 'https://www.wanandroid.com/article/list/$curPage/json?cid=$classifyId';
   }
 
+  static String generatePublicArticleListDataUrl(int publicId, int curPage) {
+    return 'https://wanandroid.com/wxarticle/list/$publicId/$curPage/json';
+  }
+
+  static String generateNewArticleListDataUrl( int curPage) {
+    return 'https://wanandroid.com/article/listproject/$curPage/json';
+  }
+
+  static String generateMyCollectionDataUrl(int curPage){
+    return 'https://www.wanandroid.com/lg/collect/list/$curPage/json';
+  }
+
   static String loginUrl = 'https://www.wanandroid.com/user/login';
 
   static String registerUrl = 'https://www.wanandroid.com/user/register';
+
+  static String publicTabDataUrl =
+      'https://wanandroid.com/wxarticle/chapters/json';
 
   static String preferenceKeyIsLogin = 'preferences_key_is_login';
 

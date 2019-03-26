@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 import 'package:wan_android_flutter/widgets/list_view_widget.dart';
-import 'package:wan_android_flutter/article_detail.dart';
-import 'package:wan_android_flutter/network/article_bean.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
-import 'widgets/multi_status_page_widget.dart';
+import 'package:wan_android_flutter/network/article_bean.dart';
+import 'package:wan_android_flutter/article_detail.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
 
-class Discovery extends StatefulWidget {
+class PublicArticleListPage extends StatefulWidget {
+  final String publicName;
+  final int publicId;
+
+  PublicArticleListPage({this.publicName, this.publicId});
+
   @override
-  _DiscoveryState createState() => _DiscoveryState();
+  _PublicArticleListPageState createState() => _PublicArticleListPageState();
 }
 
-class _DiscoveryState extends State<Discovery>
-    with AutomaticKeepAliveClientMixin {
-  int curPage = 0;
-  ArticleBean _articleData = new ArticleBean();
+class _PublicArticleListPageState extends State<PublicArticleListPage> {
   MultiStatus _multiStatus = MultiStatus.loading;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  int curPage = 1;
+  ArticleBean _articleData = new ArticleBean();
 
   _refresh() {
-    ApiRequest.getNewArticle(curPage).then((result) {
+    ApiRequest.getPublicArticleListData(widget.publicId, curPage)
+        .then((result) {
       _articleData = ArticleBean.fromJson(result.data['data']);
       setState(() {
         _multiStatus = MultiStatus.normal;
@@ -34,7 +39,8 @@ class _DiscoveryState extends State<Discovery>
 
   Future<void> _loadMore() async {
     curPage++;
-    ApiRequest.getNewArticle(curPage).then((result) {
+    ApiRequest.getPublicArticleListData(widget.publicId, curPage)
+        .then((result) {
       ArticleBean articleBean = ArticleBean.fromJson(result.data['data']);
       setState(() {
         _articleData.datas.addAll(articleBean.datas);
@@ -63,10 +69,11 @@ class _DiscoveryState extends State<Discovery>
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('最新项目'),
+        title: Text(widget.publicName),
       ),
       body: MultiStatusPageWidget(
         refreshCallback: _refresh,
+        multiStatus: _multiStatus,
         child: ListViewWidget(
           itemCount: _articleData == null || _articleData.datas == null
               ? 0
@@ -77,7 +84,6 @@ class _DiscoveryState extends State<Discovery>
           loadMore: _loadMore,
           loadMoreError: _loadError,
         ),
-        multiStatus: _multiStatus,
       ),
     );
   }
@@ -184,7 +190,4 @@ class _DiscoveryState extends State<Discovery>
       }, articleItem.id);
     }
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

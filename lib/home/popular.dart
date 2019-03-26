@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'dart:convert';
 import 'package:wan_android_flutter/network/popular_banner_bean.dart';
 import 'package:wan_android_flutter/widgets/popular_banner.dart';
 import 'package:wan_android_flutter/network/article_bean.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:wan_android_flutter/article_detail.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:wan_android_flutter/utils/constant.dart';
-import 'package:wan_android_flutter/utils/snackbar_util.dart';
-import 'package:wan_android_flutter/user/login.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
 
 //头条
@@ -138,6 +133,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     }
   }
 
+
   Widget _buildBanner() {
     return PopularBannerWidget(
       bannerTitle: (index) {
@@ -175,7 +171,6 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   Widget _buildItem(ArticleItem articleItem) {
     return Material(
       child: Card(
-        elevation: 3.0,
         child: InkWell(
           onTap: () {
             Navigator.push(context, new MaterialPageRoute(builder: (context) {
@@ -192,6 +187,19 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
             padding: EdgeInsets.all(16.0),
             child: Row(
               children: <Widget>[
+                Offstage(
+                  offstage: articleItem.envelopePic.isEmpty,
+                  child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: SizedBox(
+                          width: 100,
+                          height: 100,
+                          child: FadeInImage.memoryNetwork(
+                            placeholder: kTransparentImage,
+                            image: articleItem.envelopePic,
+                            fit: BoxFit.cover,
+                          ))),
+                ),
                 Expanded(
                     flex: 9,
                     child: Column(
@@ -242,6 +250,7 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
       ),
     );
   }
+
 
   //收藏相关操作
   _clickCollection(ArticleItem articleItem) async {

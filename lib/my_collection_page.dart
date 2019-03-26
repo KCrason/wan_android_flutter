@@ -1,30 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 import 'package:wan_android_flutter/widgets/list_view_widget.dart';
-import 'package:wan_android_flutter/article_detail.dart';
+import 'article_detail.dart';
 import 'package:wan_android_flutter/network/article_bean.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
-import 'widgets/multi_status_page_widget.dart';
-import 'package:transparent_image/transparent_image.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
+import 'package:transparent_image/transparent_image.dart';
 
-class Discovery extends StatefulWidget {
+class MyCollectionPage extends StatefulWidget {
   @override
-  _DiscoveryState createState() => _DiscoveryState();
+  _MyCollectionPageState createState() => _MyCollectionPageState();
 }
 
-class _DiscoveryState extends State<Discovery>
-    with AutomaticKeepAliveClientMixin {
+class _MyCollectionPageState extends State<MyCollectionPage> {
   int curPage = 0;
   ArticleBean _articleData = new ArticleBean();
   MultiStatus _multiStatus = MultiStatus.loading;
+  bool _isLoadComplete = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   _refresh() {
-    ApiRequest.getNewArticle(curPage).then((result) {
+    ApiRequest.getMyCollectionData(curPage).then((result) {
       _articleData = ArticleBean.fromJson(result.data['data']);
-      setState(() {
-        _multiStatus = MultiStatus.normal;
-      });
+
+      if (_articleData == null ||
+          _articleData.datas == null ||
+          _articleData.datas.length == 0) {
+        setState(() {
+          _multiStatus = MultiStatus.empty;
+        });
+      } else {
+        setState(() {
+          if (_articleData.total == _articleData.datas.length) {
+            _isLoadComplete = true;
+          }
+          _multiStatus = MultiStatus.normal;
+        });
+      }
     }).catchError((error) {
       setState(() {
         _multiStatus = MultiStatus.error;
@@ -34,10 +46,13 @@ class _DiscoveryState extends State<Discovery>
 
   Future<void> _loadMore() async {
     curPage++;
-    ApiRequest.getNewArticle(curPage).then((result) {
+    ApiRequest.getMyCollectionData(curPage).then((result) {
       ArticleBean articleBean = ArticleBean.fromJson(result.data['data']);
       setState(() {
         _articleData.datas.addAll(articleBean.datas);
+        if (_articleData.total == _articleData.datas.length) {
+          _isLoadComplete = true;
+        }
       });
     });
   }
@@ -63,16 +78,17 @@ class _DiscoveryState extends State<Discovery>
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('最新项目'),
+        title: Text('我的收藏'),
       ),
       body: MultiStatusPageWidget(
         refreshCallback: _refresh,
         child: ListViewWidget(
+          isLoadComplete: _isLoadComplete,
           itemCount: _articleData == null || _articleData.datas == null
               ? 0
               : _articleData.datas.length,
           itemBuilder: (context, index) {
-            return _buildItem(_articleData.datas[index]);
+            return _buildItem(_articleData.datas[index], index);
           },
           loadMore: _loadMore,
           loadMoreError: _loadError,
@@ -82,7 +98,7 @@ class _DiscoveryState extends State<Discovery>
     );
   }
 
-  Widget _buildItem(ArticleItem articleItem) {
+  Widget _buildItem(ArticleItem articleItem, int index) {
     return Material(
       child: Card(
         child: InkWell(
@@ -147,13 +163,11 @@ class _DiscoveryState extends State<Discovery>
                   flex: 1,
                   child: GestureDetector(
                     onTap: () {
-                      _clickCollection(articleItem);
+                      _clickUnCollection(articleItem.id, index);
                     },
                     child: Icon(
-                      articleItem.collect
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: articleItem.collect ? Colors.red : Colors.grey,
+                      Icons.favorite,
+                      color: Colors.red,
                     ),
                   ),
                 )
@@ -166,25 +180,13 @@ class _DiscoveryState extends State<Discovery>
   }
 
   //收藏相关操作
-  _clickCollection(ArticleItem articleItem) async {
+  _clickUnCollection(int articleId, int index) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
-    if (articleItem.collect) {
-      _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
-          (isOperateSuccess) {
-        setState(() {
-          articleItem.collect = false;
-        });
-      }, articleItem.id);
-    } else {
-      _collectionHelper.collectionArticle(_scaffoldKey.currentState,
-          (isOperateSuccess) {
-        setState(() {
-          articleItem.collect = true;
-        });
-      }, articleItem.id);
-    }
+    _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
+        (isOperateSuccess) {
+      setState(() {
+        _articleData.datas.removeAt(index);
+      });
+    }, articleId);
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

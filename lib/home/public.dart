@@ -2,6 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
+import 'package:wan_android_flutter/network/api_request.dart';
+import 'package:wan_android_flutter/network/project_classfiy_tab_bean.dart';
+import 'package:random_color/random_color.dart';
+import 'package:wan_android_flutter/home/public_article_list_page.dart';
+
 
 class Public extends StatefulWidget {
   @override
@@ -11,22 +16,56 @@ class Public extends StatefulWidget {
 class _PublicState extends State<Public> with AutomaticKeepAliveClientMixin {
   MultiStatus _multiStatus = MultiStatus.loading;
 
+  List<Widget> widgets = new List();
+
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+  }
+
+  void _refresh() {
+    ApiRequest.getPublicTabData().then((result) {
+      ProjectClassifyTabBean projectClassifyTabBean =
+      ProjectClassifyTabBean.fromJson(result.data);
+      projectClassifyTabBean.data.forEach((projectClassifyTabItem) {
+        widgets.add(new RaisedButton(
+            onPressed: () {
+              Navigator.push(context, new MaterialPageRoute(builder: (context) {
+                return PublicArticleListPage(
+                  publicId: projectClassifyTabItem.id,
+                  publicName: projectClassifyTabItem.name,);
+              }));
+            },
+            child: Text(
+              '${projectClassifyTabItem.name}',
+              style: TextStyle(color: RandomColor().randomColor()),
+            )));
+      });
+      setState(() {
+        _multiStatus = MultiStatus.normal;
+      });
+    }).catchError((error) {
+      setState(() {
+        _multiStatus = MultiStatus.error;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: MultiStatusPageWidget(
         multiStatus: _multiStatus,
-        child: Center(
-          child: Text('有数据状态'),
+        refreshCallback: _refresh,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Wrap(
+            spacing: 16.0,
+            runSpacing: 16.0,
+            children: widgets,
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _multiStatus = MultiStatus.notNetwork;
-          });
-        },
-        child: Icon(Icons.add),
       ),
     );
   }

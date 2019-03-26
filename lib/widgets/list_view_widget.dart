@@ -53,10 +53,7 @@ class _ListViewWidgetState extends State<ListViewWidget> {
             isLoading = false;
             isLoadError = true;
           });
-        }).whenComplete(() {});
-        loadMoreResult.whenComplete(() {
-          isLoading = false;
-        });
+        }).whenComplete(() {isLoading = false;});
       }
     });
   }

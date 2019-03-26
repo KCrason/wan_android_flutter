@@ -68,9 +68,31 @@ class ApiRequest {
     return await Dio().get(Constants.systemDataUrl);
   }
 
-  static Future<Response> getSystemArticleListData(int classifyId, int curPage) async{
+  static Future<Response> getSystemArticleListData(
+      int classifyId, int curPage) async {
     return await Dio().get(
         Constants.generateSystemArticleListDataUrl(classifyId, curPage),
+        options: _getOptions(await getCookieJar()));
+  }
+
+  static Future<Response> getPublicTabData() async {
+    return await Dio().get(Constants.publicTabDataUrl);
+  }
+
+  static Future<Response> getPublicArticleListData(
+      int publicId, int curPage) async {
+    return await Dio().get(
+        Constants.generatePublicArticleListDataUrl(publicId, curPage),
+        options: _getOptions(await getCookieJar()));
+  }
+
+  static Future<Response> getNewArticle(int curPage) async {
+    return await Dio().get(Constants.generateNewArticleListDataUrl(curPage),
+        options: _getOptions(await getCookieJar()));
+  }
+
+  static Future<Response> getMyCollectionData(int curPage) async {
+    return await Dio().get(Constants.generateMyCollectionDataUrl(curPage),
         options: _getOptions(await getCookieJar()));
   }
 
