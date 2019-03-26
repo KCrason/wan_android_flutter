@@ -131,17 +131,41 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
                       child: Text(
                         '退出登陆',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w400,color: Colors.white),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white),
                       ),
                     ),
                   ),
                   onTap: () {
-                    UserHelper.loginOut(_globalKey.currentState, () {
-                      setState(() {
-                        _isLogin = false;
-                        _userName = '还未登陆，点击登陆';
-                      });
-                    });
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('提示'),
+                            content: Text(
+                                '是否确认退出登陆？退出登陆后将删除本地缓存用户数据并将无法收藏相关文章。如有需要，请重新登陆。'),
+                            actions: <Widget>[
+                              FlatButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('取消')),
+                              FlatButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    UserHelper.loginOut(_globalKey.currentState,
+                                        () {
+                                      setState(() {
+                                        _isLogin = false;
+                                        _userName = '还未登陆，点击登陆';
+                                      });
+                                    });
+                                  },
+                                  child: Text('确定'))
+                            ],
+                          );
+                        });
                   },
                 )),
           )

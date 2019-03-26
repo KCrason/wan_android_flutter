@@ -89,7 +89,7 @@ class _LoginState extends State<Login> {
                   },
                   child: Text(
                     '立即注册',
-                    style: TextStyle(color: Theme.of(context).primaryColor),
+                    style: TextStyle(color: Colors.blue),
                   ),
                 ),
                 alignment: FractionalOffset.centerRight,
@@ -97,12 +97,10 @@ class _LoginState extends State<Login> {
             ),
             Container(
               margin: EdgeInsets.only(top: 20.0),
-              child: SizedBox(
-                height: 44.0,
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: RaisedButton(
-                  color: Theme.of(context).primaryColor,
-                  onPressed: () {
+              child: Card(
+                color: Colors.blue,
+                child: InkWell(
+                  onTap: () {
                     if (_account == null || _account.length == 0) {
                       _globalKey.currentState
                           .showSnackBar(SnackBar(content: Text('请输入账户名')));
@@ -118,7 +116,6 @@ class _LoginState extends State<Login> {
                       _login();
                     });
                   },
-                  textColor: Colors.white,
                   child: Container(
                     height: 44.0,
                     child: Row(
@@ -127,7 +124,7 @@ class _LoginState extends State<Login> {
                         GestureDetector(
                           child: Text(
                             '立即登录',
-                            style: TextStyle(fontSize: 17),
+                            style: TextStyle(fontSize: 17, color: Colors.white),
                           ),
                         ),
                         Container(
