@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'utils/app_route.dart';
 import 'package:wan_android_flutter/utils/toast_util.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ArticleDetail extends StatefulWidget {
   final String title;
@@ -31,6 +32,7 @@ class _ArticleDetailState extends State<ArticleDetail> {
   WebViewController _controller;
 
   bool localCollectionState;
+  bool _isLoadComplete = false;
 
   @override
   void initState() {
@@ -136,15 +138,27 @@ class _ArticleDetailState extends State<ArticleDetail> {
           )
         ],
       ),
-      body: WebView(
-        onWebViewCreated: (controller) {
-          _controller = controller;
-        },
-        initialUrl: widget.url,
-        javascriptMode: JavascriptMode.unrestricted,
-        onPageFinished: (url) {
-          print('$url load complete.');
-        },
+      body: Stack(
+        children: <Widget>[
+          WebView(
+            onWebViewCreated: (controller) {
+              _controller = controller;
+            },
+            initialUrl: widget.url,
+            javascriptMode: JavascriptMode.unrestricted,
+            onPageFinished: (url) {
+              setState(() {
+                _isLoadComplete = true;
+              });
+            },
+          ),
+          Offstage(
+            offstage: _isLoadComplete,
+            child: SpinKitCircle(
+              color: Colors.black,
+            ),
+          )
+        ],
       ),
     );
   }

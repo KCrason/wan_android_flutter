@@ -45,6 +45,11 @@ class ApiRequest {
         options: _getOptions(await getCookieJar()));
   }
 
+  static Future<Response> getTopArticleData() async {
+    return await Dio().get(Constants.topArticleDataUrl,
+        options: _getOptions(await getCookieJar()));
+  }
+
   //获取收藏列表
   static Future<Response> getCollectionListData(int curPage) async {
     return await Dio().get(Constants.generateCollectionListUrl(curPage),
@@ -75,11 +80,12 @@ class ApiRequest {
   }
 
   //获取项目分类tab
-  static void getProjectClassifyTabData(Function callback) async {
+  static void getProjectClassifyTabData(
+      Function callback, Function errorCallback) async {
     return await Dio().get(Constants.projectClassifyTabUrl).then((result) {
       callback(ProjectClassifyTabBean.fromJson(result.data));
     }).catchError((error) {
-      throw error;
+      errorCallback(error);
     });
   }
 

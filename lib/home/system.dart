@@ -4,6 +4,7 @@ import 'package:wan_android_flutter/network/system_bean.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
 import 'package:dio/dio.dart';
 import 'package:wan_android_flutter/home/system_children_page.dart';
+import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 
 class System extends StatefulWidget {
   @override
@@ -11,8 +12,9 @@ class System extends StatefulWidget {
 }
 
 class _SystemState extends State<System> with AutomaticKeepAliveClientMixin {
-
   SystemBean _systemBean;
+
+  MultiStatus _multiStatus = MultiStatus.loading;
 
   _buildItem(SystemItemBean systemItemBean) {
     return Card(
@@ -45,37 +47,49 @@ class _SystemState extends State<System> with AutomaticKeepAliveClientMixin {
   }
 
   Future<void> _refresh() async {
-    Response response = await ApiRequest.getSystemData();
+    try {
+      Response response = await ApiRequest.getSystemData();
+      setState(() {
+        _systemBean = SystemBean.fromJson(response.data);
+        _multiStatus = MultiStatus.normal;
+      });
+    } catch (e) {
+      setState(() {
+        _multiStatus = MultiStatus.error;
+      });
+    }
+  }
+
+  void retryRefresh() {
     setState(() {
-      _systemBean = SystemBean.fromJson(response.data);
+      _multiStatus = MultiStatus.loading;
     });
+    _refresh();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _refresh();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            Response response = snapshot.data;
-            _systemBean = SystemBean.fromJson(response.data);
-            return RefreshIndicator(
-                child: ListView.builder(
-                  itemBuilder: (context, index) {
-                    return _buildItem(_systemBean.data[index]);
-                  },
-                  itemCount: _systemBean == null || _systemBean.data == null
-                      ? 0
-                      : _systemBean.data.length,
-                ),
-                onRefresh: _refresh);
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-        future: ApiRequest.getSystemData(),
+      body: MultiStatusPageWidget(
+        refreshCallback: retryRefresh,
+        multiStatus: _multiStatus,
+        child: RefreshIndicator(
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                return _buildItem(_systemBean.data[index]);
+              },
+              itemCount: _systemBean == null || _systemBean.data == null
+                  ? 0
+                  : _systemBean.data.length,
+            ),
+            onRefresh: _refresh),
       ),
     );
   }

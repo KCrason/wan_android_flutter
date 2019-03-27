@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 typedef RetryRefreshCallback = void Function();
 
@@ -28,7 +29,9 @@ class _MultiStatusPageWidgetState extends State<MultiStatusPageWidget> {
         return _buildStatusView(widget, Icons.error, '加载错误~');
       case MultiStatus.loading:
         return Center(
-          child: CircularProgressIndicator(),
+          child: SpinKitCircle (
+            color: Colors.black,
+          ),
         );
       case MultiStatus.empty:
         return Center(
@@ -68,7 +71,7 @@ class _MultiStatusPageWidgetState extends State<MultiStatusPageWidget> {
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: RaisedButton(
-                color: Theme.of(context).primaryColor,
+                color: Colors.blue,
                 onPressed: widget.refreshCallback,
                 child: Text(
                   '点击重试',

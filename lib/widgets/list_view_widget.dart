@@ -102,7 +102,7 @@ class _ListViewWidgetState extends State<ListViewWidget> {
           if (index == 0) {
             return widget.headerViewBuild(context);
           } else if (index > 0 && index <= widget.itemCount) {
-            return widget.itemBuilder(context, index);
+            return widget.itemBuilder(context, index-1);
           } else {
             return Container(
               padding: EdgeInsets.all(16.0),

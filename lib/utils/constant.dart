@@ -66,4 +66,7 @@ class Constants {
   static const String preferenceKeyUserName = 'preferences_key_user_name';
 
   static const String systemDataUrl = 'https://www.wanandroid.com/tree/json';
+
+  static const String topArticleDataUrl =
+      'https://www.wanandroid.com/article/top/json';
 }

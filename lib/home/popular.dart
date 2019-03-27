@@ -8,6 +8,8 @@ import 'package:wan_android_flutter/article_detail.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:wan_android_flutter/widgets/list_view_widget.dart';
+import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 
 //头条
 class Popular extends StatefulWidget {
@@ -21,38 +23,60 @@ class Popular extends StatefulWidget {
 class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   PopularBannerBean _bannerData;
   ArticleBean _articleData;
+
+  List<dynamic> topArticle;
+
   int _curPage = 0;
-  ScrollController _scrollController = new ScrollController();
+
+  MultiStatus _multiStatus = MultiStatus.loading;
+
+//  ScrollController _scrollController = new ScrollController();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  bool isLoadMore = false;
-
-  void loadMore() {
+  Future<void> loadMore() async {
     _curPage++;
-    isLoadMore = true;
     ApiRequest.getPopularListData(_curPage).then((responseArticle) {
       ArticleBean newArticleData =
           ArticleBean.fromJson(responseArticle.data['data']);
       setState(() {
-        isLoadMore = false;
         _articleData.datas.addAll(newArticleData.datas);
       });
     });
   }
 
+  void loadError(String errorMsg) {
+    if (_curPage > 0) {
+      _curPage--;
+      if (_curPage < 0) {
+        _curPage = 0;
+      }
+    }
+  }
+
+  void _retryRefresh() {
+    setState(() {
+      _multiStatus = MultiStatus.loading;
+    });
+    _requestBanner();
+  }
+
   Future<Null> _requestBanner() async {
     try {
       _curPage = 0;
-      isLoadMore = false;
       Response responseBanner = await ApiRequest.getBannerData();
       Response responseArticle = await ApiRequest.getPopularListData(_curPage);
+      Response responseTopArticle = await ApiRequest.getTopArticleData();
       setState(() {
         _bannerData = PopularBannerBean.fromJson(responseBanner.data);
+        topArticle = responseTopArticle.data['data'];
         _articleData = ArticleBean.fromJson(responseArticle.data['data']);
+        _multiStatus = MultiStatus.normal;
       });
     } catch (e) {
-      print(e);
+      setState(() {
+        _multiStatus = MultiStatus.error;
+      });
     }
   }
 
@@ -60,79 +84,80 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.offset ==
-              _scrollController.position.maxScrollExtent &&
-          !isLoadMore) {
-        setState(() {
-          loadMore();
-        });
-      }
-    });
     _requestBanner();
   }
 
-  Widget getBody() {
-    if (_articleData == null) {
-      return new Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return Container(
-        child: RefreshIndicator(
-            child: ListView.builder(
-                controller: _scrollController,
-                itemCount: (_articleData == null || _articleData.datas == null)
-                    ? 1
-                    : _articleData.datas.length + 2,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return _buildBanner();
-                  } else if (index == _articleData.datas.length + 1) {
-                    return Container(
-                      padding: EdgeInsets.all(12.0),
-                      child: SpinKitCircle(color: Colors.black,size: 24,),
+  Widget _buildBanner() {
+    return Column(
+      children: <Widget>[
+        PopularBannerWidget(
+          bannerTitle: (index) {
+            return _bannerData.data[index].title;
+          },
+          bannerCount: _bannerData == null || _bannerData.data == null
+              ? 0
+              : _bannerData.data.length,
+          buildBannerItem: (context, index) {
+            BannerItem bannerItem = _bannerData.data[index];
+            return Container(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context)
+                      .push(new MaterialPageRoute(builder: (context) {
+                    return ArticleDetail(
+                      url: bannerItem.url,
+                      title: bannerItem.title,
+                      articleId: '${bannerItem.id}',
+                      isBannerArticle: true,
                     );
-                  }
-                  return _buildItem(_articleData.datas[index - 1]);
-                }),
-            onRefresh: _requestBanner),
-      );
-    }
+                  }));
+                },
+                child: FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image: bannerItem.imagePath,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            );
+          },
+        ),
+        Offstage(
+          offstage: topArticle == null,
+          child: Column(
+            children: buildTopArticleViews(),
+          ),
+        )
+      ],
+    );
   }
 
-  Widget _buildBanner() {
-    return PopularBannerWidget(
-      bannerTitle: (index) {
-        return _bannerData.data[index].title;
-      },
-      bannerCount: _bannerData == null || _bannerData.data == null
-          ? 0
-          : _bannerData.data.length,
-      buildBannerItem: (context, index) {
-        BannerItem bannerItem = _bannerData.data[index];
-        return Container(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context)
-                  .push(new MaterialPageRoute(builder: (context) {
-                return ArticleDetail(
-                  url: bannerItem.url,
-                  title: bannerItem.title,
-                  articleId: '${bannerItem.id}',
-                  isBannerArticle: true,
-                );
-              }));
-            },
-            child: FadeInImage.memoryNetwork(
-              placeholder: kTransparentImage,
-              image: bannerItem.imagePath,
-              fit: BoxFit.cover,
-            ),
+  List<Widget> buildTopArticleViews() {
+    return List<Widget>.generate(topArticle.length, (index) {
+      ArticleItem articleItem = ArticleItem.fromJson(topArticle[index]);
+      return Card(
+        child: ListTile(
+          leading: Icon(
+            Icons.assistant_photo,
+            color: Colors.red,
           ),
-        );
-      },
-    );
+          title: Text(
+            '${articleItem.title}',
+            style: TextStyle(color: Colors.red),
+          ),
+          onTap: () {
+            Navigator.push(context, new MaterialPageRoute(builder: (context) {
+              return ArticleDetail(
+                title: articleItem.title,
+                url: articleItem.link,
+                isCollection: articleItem.collect,
+                articleId: '${articleItem.id}',
+                isBannerArticle: true,
+              );
+            }));
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildItem(ArticleItem articleItem) {
@@ -224,15 +249,13 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   _clickCollection(ArticleItem articleItem) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
     if (articleItem.collect) {
-      _collectionHelper.unCollectionArticle(context,
-          (isOperateSuccess) {
+      _collectionHelper.unCollectionArticle(context, (isOperateSuccess) {
         setState(() {
           articleItem.collect = false;
         });
       }, articleItem.id);
     } else {
-      _collectionHelper.collectionArticle(context,
-          (isOperateSuccess) {
+      _collectionHelper.collectionArticle(context, (isOperateSuccess) {
         setState(() {
           articleItem.collect = true;
         });
@@ -246,7 +269,26 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
-      body: getBody(),
+      body: MultiStatusPageWidget(
+        refreshCallback: _retryRefresh,
+        multiStatus: _multiStatus,
+        child: RefreshIndicator(
+          child: ListViewWidget(
+            itemBuilder: (context, index) {
+              return _buildItem(_articleData.datas[index]);
+            },
+            itemCount: (_articleData == null || _articleData.datas == null)
+                ? 0
+                : _articleData.datas.length,
+            loadMore: loadMore,
+            loadMoreError: loadError,
+            headerViewBuild: (context) {
+              return _buildBanner();
+            },
+          ),
+          onRefresh: _requestBanner,
+        ),
+      ),
     );
   }
 
