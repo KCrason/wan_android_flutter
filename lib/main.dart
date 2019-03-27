@@ -73,9 +73,9 @@ class _MyHomePageState extends State<MyHomePage>
           BottomNavigationBarItem(
               icon: Icon(Icons.explore),
               title: _currentIndex == 1
-                  ? Text('导航',
+                  ? Text('最新',
                       style: TextStyle(color: Colors.blue))
-                  : Text('导航'),
+                  : Text('最新'),
               activeIcon: Icon(
                 Icons.explore,
                 color: Colors.blue,

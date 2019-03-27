@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'utils/app_route.dart';
-import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:wan_android_flutter/utils/toast_util.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
 
 class ArticleDetail extends StatefulWidget {
@@ -43,7 +43,7 @@ class _ArticleDetailState extends State<ArticleDetail> {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      SnackBarUtil.showShortSnackBar(_scaffoldKey.currentState, '无法打开$url');
+      ToastUtil.showShortToast(context, '无法打开$url');
     }
   }
 
@@ -51,15 +51,13 @@ class _ArticleDetailState extends State<ArticleDetail> {
   _clickCollection(String articleId) async {
     CollectionHelper collectionHelper = new CollectionHelper();
     if (localCollectionState) {
-      collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
-          (isOperateSuccess) {
+      collectionHelper.unCollectionArticle(context, (isOperateSuccess) {
         setState(() {
           this.localCollectionState = false;
         });
       }, int.parse(articleId));
     } else {
-      collectionHelper.collectionArticle(_scaffoldKey.currentState,
-          (isOperateSuccess) {
+      collectionHelper.collectionArticle(context, (isOperateSuccess) {
         setState(() {
           this.localCollectionState = true;
         });

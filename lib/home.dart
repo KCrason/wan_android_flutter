@@ -46,8 +46,8 @@ class _HomePageState extends State<Home>
                   ),
                   Expanded(
                     child: Text(
-                      '热门',
-                      style: TextStyle(color: Colors.grey, fontSize: 16.0),
+                      '搜索点什么吧...',
+                      style: TextStyle(color: Colors.grey, fontSize: 14.0),
                     ),
                     flex: 8,
                   )

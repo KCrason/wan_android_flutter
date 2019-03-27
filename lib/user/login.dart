@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wan_android_flutter/utils/constant.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
-import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:wan_android_flutter/utils/toast_util.dart';
 import 'package:wan_android_flutter/utils/user_helper.dart';
 import 'package:wan_android_flutter/events/user_login_event.dart';
+import 'package:wan_android_flutter/utils/common_util.dart';
+import 'package:wan_android_flutter/utils/toast_util.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -18,7 +20,8 @@ class _LoginState extends State<Login> {
   String _account;
   String _password;
 
-  bool _isLogging = false;
+  FocusNode _focusNodeAccount = new FocusNode();
+  FocusNode _focusNodePassword = new FocusNode();
 
   //保存登陆状态
   _saveLoginState(String userName) async {
@@ -29,20 +32,30 @@ class _LoginState extends State<Login> {
   }
 
   void _login() async {
-    _isLogging = true;
+    CommonUtil.showLoadingMsgDialog(context, '登录中...');
     ApiRequest.login(_account, _password).then((response) {
       final jsonResult = json.decode(response.toString());
       int errorCode = jsonResult['errorCode'];
       if (errorCode == 0) {
         _saveLoginState(jsonResult['data']['username']);
+        Navigator.of(context, rootNavigator: true).pop();
         Navigator.pop(context);
       } else {
-        setState(() {
-          _isLogging = false;
-        });
-        SnackBarUtil.showShortSnackBar(
-            _globalKey.currentState, '登陆失败：${jsonResult['errorMsg']}');
+        Navigator.of(context, rootNavigator: true).pop();
+        ToastUtil.showShortToast(context, '登陆失败：${jsonResult['errorMsg']}');
       }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _focusNodeAccount.addListener(() {
+      setState(() {});
+    });
+    _focusNodePassword.addListener(() {
+      setState(() {});
     });
   }
 
@@ -59,9 +72,21 @@ class _LoginState extends State<Login> {
             TextField(
               decoration: InputDecoration(
                   labelText: '请输入用户名',
-                  icon: Icon(
-                    Icons.account_circle,
-                  )),
+                  labelStyle: TextStyle(
+                      color: _focusNodeAccount.hasFocus
+                          ? Colors.blue
+                          : Colors.black),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                  icon: _focusNodeAccount.hasFocus
+                      ? Icon(
+                          Icons.account_circle,
+                          color: Colors.blue,
+                        )
+                      : Icon(
+                          Icons.account_circle,
+                        )),
+              focusNode: _focusNodeAccount,
               onChanged: (text) {
                 setState(() {
                   _account = text;
@@ -71,9 +96,22 @@ class _LoginState extends State<Login> {
             TextField(
               decoration: InputDecoration(
                   labelText: '请输入密码',
-                  icon: Icon(
-                    Icons.lock,
-                  )),
+                  labelStyle: TextStyle(
+                      color: _focusNodePassword.hasFocus
+                          ? Colors.blue
+                          : Colors.black),
+                  focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                  icon: _focusNodePassword.hasFocus
+                      ? Icon(
+                          Icons.lock,
+                          color: Colors.blue,
+                        )
+                      : Icon(
+                          Icons.lock,
+                        )),
+              focusNode: _focusNodePassword,
+              obscureText: true,
               onChanged: (text) {
                 setState(() {
                   _password = text;
@@ -102,13 +140,11 @@ class _LoginState extends State<Login> {
                 child: InkWell(
                   onTap: () {
                     if (_account == null || _account.length == 0) {
-                      _globalKey.currentState
-                          .showSnackBar(SnackBar(content: Text('请输入账户名')));
+                      ToastUtil.showShortToast(context, '请输入账户名');
                       return;
                     }
                     if (_password == null || _password.length == 0) {
-                      _globalKey.currentState
-                          .showSnackBar(SnackBar(content: Text('请输入密码')));
+                      ToastUtil.showShortToast(context, '请输入密码');
                       return;
                     }
                     setState(() {
@@ -118,29 +154,11 @@ class _LoginState extends State<Login> {
                   },
                   child: Container(
                     height: 44.0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        GestureDetector(
-                          child: Text(
-                            '立即登录',
-                            style: TextStyle(fontSize: 17, color: Colors.white),
-                          ),
-                        ),
-                        Container(
-                          height: _isLogging ? 17 : 0,
-                          width: _isLogging ? 17 : 0,
-                          margin: EdgeInsets.only(left: _isLogging ? 16 : 0),
-                          child: SizedBox(
-                            width: 17,
-                            height: 17,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation(Colors.white),
-                            ),
-                          ),
-                        )
-                      ],
+                    child: Center(
+                      child: Text(
+                        '立即登录',
+                        style: TextStyle(fontSize: 17, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),

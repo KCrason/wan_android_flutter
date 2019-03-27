@@ -69,10 +69,10 @@ class SqfHelper {
     return SearchHistoryBean.fromMap(result.first);
   }
 
-  Future<int> deleteItem(int id) async {
+  Future<int> deleteItem(String name) async {
     var dbClient = await db;
     return await dbClient
-        .delete(tableName, where: '$columnId = ?', whereArgs: [id]);
+        .delete(tableName, where: '$columnSearchWord = ?', whereArgs: [name]);
   }
 
 

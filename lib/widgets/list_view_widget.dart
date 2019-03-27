@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 typedef HeaderViewWidgetBuilder = Widget Function(BuildContext context);
 typedef LoadMoreCallBack = Future<void> Function();
@@ -53,7 +54,9 @@ class _ListViewWidgetState extends State<ListViewWidget> {
             isLoading = false;
             isLoadError = true;
           });
-        }).whenComplete(() {isLoading = false;});
+        }).whenComplete(() {
+          isLoading = false;
+        });
       }
     });
   }
@@ -62,36 +65,21 @@ class _ListViewWidgetState extends State<ListViewWidget> {
     if (widget.isLoadComplete) {
       return Center(
         child: Text(
-          '到底啦 ^_^',
-          style: TextStyle(fontSize: 16.0),
+          '没有更多数据',
+          style: TextStyle(fontSize: 14.0, color: Colors.grey),
         ),
       );
     } else if (isLoadError) {
       return Center(
         child: Text(
           '加载失败啦 %>_<%',
-          style: TextStyle(fontSize: 16.0),
+          style: TextStyle(fontSize: 14.0, color: Colors.grey),
         ),
       );
     } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(left: 12.0),
-            child: Text(
-              '正在加载...',
-              style: TextStyle(fontSize: 16.0),
-            ),
-          )
-        ],
+      return SpinKitCircle(
+        color: Colors.black,
+        size: 24,
       );
     }
   }
@@ -104,7 +92,7 @@ class _ListViewWidgetState extends State<ListViewWidget> {
         if (widget.headerViewBuild == null) {
           if (index == widget.itemCount) {
             return Container(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(12.0),
               child: _buildLoadMoreStateWidget(),
             );
           } else {

@@ -8,19 +8,18 @@ import 'package:wan_android_flutter/widgets/multi_status_page_widget.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
 import 'package:wan_android_flutter/article_detail.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'events/update_search_event.dart';
 
-class SystemChildrenItemPage extends StatefulWidget {
-  final String projectTabName;
-  final int projectTabId;
+class SearchResultPage extends StatefulWidget {
+  final String keyWord;
 
-  SystemChildrenItemPage({Key key, this.projectTabId, this.projectTabName})
-      : super(key: key);
+  SearchResultPage({this.keyWord});
 
   @override
-  State<StatefulWidget> createState() => _SystemChildrenItemPageState();
+  _SearchResultPageState createState() => _SearchResultPageState();
 }
 
-class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
+class _SearchResultPageState extends State<SearchResultPage> {
   int mCurrentPage = 0;
   List<ArticleItem> _articleItems = new List();
   bool _isLoadComplete = false;
@@ -44,8 +43,7 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
   Future<void> _refreshData() async {
     mCurrentPage = 0;
     _isLoadComplete = false;
-    ApiRequest.getSystemArticleListData(widget.projectTabId, mCurrentPage)
-        .then((response) {
+    ApiRequest.search(widget.keyWord, mCurrentPage).then((response) {
       ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
       if (articleBean.total == 0) {
         setState(() {
@@ -79,8 +77,7 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
 
   Future<void> _loadMore() async {
     mCurrentPage++;
-    Response response = await ApiRequest.getProjectClassifyListData(
-        widget.projectTabId, mCurrentPage);
+    Response response = await ApiRequest.search(widget.keyWord, mCurrentPage);
     ArticleBean articleBean = ArticleBean.fromJson(response.data['data']);
     _articleItems.addAll(articleBean.datas);
     _setLoadCompleteState(articleBean);
@@ -93,6 +90,32 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
       if (mCurrentPage < 1) {
         mCurrentPage = 1;
       }
+    }
+  }
+
+  List<TextSpan> createTextSpan(String title) {
+    String newKeyWord = '<em class=\'highlight\'>${widget.keyWord}</em>';
+    Match match = RegExp(newKeyWord).firstMatch(title);
+    if (match != null) {
+      int start = match.start;
+      int end = match.end;
+      String startStr = title.substring(0, start);
+      String endStr = title.substring(end);
+      return <TextSpan>[
+        TextSpan(
+            text: startStr,
+            style: TextStyle(fontSize: 16.0, color: Colors.black)),
+        TextSpan(
+            text: widget.keyWord,
+            style: TextStyle(color: Colors.blue, fontSize: 16)),
+        TextSpan(
+            text: endStr, style: TextStyle(fontSize: 16.0, color: Colors.black))
+      ];
+    } else {
+      return <TextSpan>[
+        TextSpan(
+            text: title, style: TextStyle(fontSize: 16.0, color: Colors.black)),
+      ];
     }
   }
 
@@ -129,29 +152,33 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
                           ))),
                 ),
                 Expanded(
-                    flex: 9,
+                    flex: 8,
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(
-                          '${articleItem.title}',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
+                        RichText(
+                          maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                                children:
+                                    createTextSpan('${articleItem.title}'))),
                         Container(
                           margin: EdgeInsets.only(top: 6.0),
                           child: Row(
                             children: <Widget>[
-                              Text(
-                                '${articleItem.niceDate}',
-                                style: TextStyle(color: Colors.grey),
+                              Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Colors.grey,
                               ),
-                              Container(
-                                margin: EdgeInsets.only(left: 16.0),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 4.0),
                                 child: Text(
-                                  '来源：${articleItem.author}',
+                                  '${articleItem.niceDate}  @${articleItem.author}',
                                   style: TextStyle(color: Colors.grey),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -200,6 +227,9 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('搜索${widget.keyWord}的结果'),
+      ),
       key: _scaffoldKey,
       body: RefreshIndicator(
           child: MultiStatusPageWidget(
@@ -217,5 +247,12 @@ class _SystemChildrenItemPageState extends State<SystemChildrenItemPage> {
           ),
           onRefresh: _refreshData),
     );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    eventBus.fire(new UpdateSearchEvent());
   }
 }

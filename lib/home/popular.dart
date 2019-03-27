@@ -7,6 +7,7 @@ import 'package:transparent_image/transparent_image.dart';
 import 'package:wan_android_flutter/article_detail.dart';
 import 'package:wan_android_flutter/network/api_request.dart';
 import 'package:wan_android_flutter/utils/collection_helper.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 //头条
 class Popular extends StatefulWidget {
@@ -89,26 +90,8 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                     return _buildBanner();
                   } else if (index == _articleData.datas.length + 1) {
                     return Container(
-                      padding: EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          ),
-                          Container(
-                            margin: EdgeInsets.only(left: 12.0),
-                            child: Text(
-                              '正在加载...',
-                              style: TextStyle(fontSize: 16.0),
-                            ),
-                          )
-                        ],
-                      ),
+                      padding: EdgeInsets.all(12.0),
+                      child: SpinKitCircle(color: Colors.black,size: 24,),
                     );
                   }
                   return _buildItem(_articleData.datas[index - 1]);
@@ -191,7 +174,9 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
                       children: <Widget>[
                         Text(
                           '${articleItem.title}',
-                          style: TextStyle(fontSize: 18.0),
+                          style: TextStyle(fontSize: 16.0),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         Container(
                           margin: EdgeInsets.only(top: 6.0),
@@ -239,14 +224,14 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
   _clickCollection(ArticleItem articleItem) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
     if (articleItem.collect) {
-      _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
+      _collectionHelper.unCollectionArticle(context,
           (isOperateSuccess) {
         setState(() {
           articleItem.collect = false;
         });
       }, articleItem.id);
     } else {
-      _collectionHelper.collectionArticle(_scaffoldKey.currentState,
+      _collectionHelper.collectionArticle(context,
           (isOperateSuccess) {
         setState(() {
           articleItem.collect = true;

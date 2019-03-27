@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:wan_android_flutter/network/api_request.dart';
-import 'package:wan_android_flutter/utils/snackbar_util.dart';
+import 'package:wan_android_flutter/utils/toast_util.dart';
 
 import 'package:wan_android_flutter/utils/user_helper.dart';
 
 class CollectionHelper {
-  void unCollectionArticleForMyCollectionPage(ScaffoldState _scaffoldKey,
+  void unCollectionArticleForMyCollectionPage(BuildContext context,
       Function success, int articleId, int originId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
@@ -20,20 +20,20 @@ class CollectionHelper {
       final jsonResult = json.decode(response.toString());
       int errorCode = jsonResult['errorCode'];
       if (errorCode == 0) {
-        SnackBarUtil.showShortSnackBar(_scaffoldKey, '已取消收藏');
+        ToastUtil.showShortToast(context, '已取消收藏');
         if (success != null) {
           success(true);
         }
       } else {
-        SnackBarUtil.showShortSnackBar(_scaffoldKey, '取消失败');
+        ToastUtil.showShortToast(context, '取消失败');
       }
     } else {
-      UserHelper.toLogin(_scaffoldKey.context);
+      UserHelper.toLogin(context);
     }
   }
 
   void unCollectionArticle(
-      ScaffoldState _scaffoldKey, Function success, int articleId) async {
+     BuildContext context, Function success, int articleId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
     if (isLogin != null && isLogin) {
@@ -42,20 +42,20 @@ class CollectionHelper {
       final jsonResult = json.decode(response.toString());
       int errorCode = jsonResult['errorCode'];
       if (errorCode == 0) {
-        SnackBarUtil.showShortSnackBar(_scaffoldKey, '已取消收藏');
+        ToastUtil.showShortToast(context, '已取消收藏');
         if (success != null) {
           success(true);
         }
       } else {
-        SnackBarUtil.showShortSnackBar(_scaffoldKey, '取消失败');
+        ToastUtil.showShortToast(context, '取消失败');
       }
     } else {
-      UserHelper.toLogin(_scaffoldKey.context);
+      UserHelper.toLogin(context);
     }
   }
 
   void collectionArticle(
-      ScaffoldState _scaffoldKey, Function success, int articleId) async {
+      BuildContext context, Function success, int articleId) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     bool isLogin = sharedPreferences.getBool(Constants.preferenceKeyIsLogin);
     if (isLogin != null && isLogin) {
@@ -64,15 +64,15 @@ class CollectionHelper {
       final jsonResult = json.decode(response.toString());
       int errorCode = jsonResult['errorCode'];
       if (errorCode == 0) {
-        SnackBarUtil.showShortSnackBar(_scaffoldKey, '收藏成功');
+        ToastUtil.showShortToast(context, '收藏成功');
         if (success != null) {
           success(true);
         }
       } else {
-        SnackBarUtil.showShortSnackBar(_scaffoldKey, '收藏失败');
+        ToastUtil.showShortToast(context, '收藏失败');
       }
     } else {
-      UserHelper.toLogin(_scaffoldKey.context);
+      UserHelper.toLogin(context);
     }
   }
 }

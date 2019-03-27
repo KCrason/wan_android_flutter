@@ -54,7 +54,7 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext contextParent) {
     return Scaffold(
       key: _globalKey,
       appBar: AppBar(
@@ -139,7 +139,7 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
                   ),
                   onTap: () {
                     showDialog(
-                        context: context,
+                        context: contextParent,
                         builder: (context) {
                           return AlertDialog(
                             title: Text('提示'),
@@ -154,8 +154,7 @@ class _MeState extends State<Me> with AutomaticKeepAliveClientMixin {
                               FlatButton(
                                   onPressed: () {
                                     Navigator.pop(context);
-                                    UserHelper.loginOut(_globalKey.currentState,
-                                        () {
+                                    UserHelper.loginOut(contextParent, () {
                                       setState(() {
                                         _isLogin = false;
                                         _userName = '还未登陆，点击登陆';

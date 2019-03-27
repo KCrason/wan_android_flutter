@@ -21,7 +21,7 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
 
   Future<void> _refresh() async {
     curPage = 0;
-    _isLoadComplete =false;
+    _isLoadComplete = false;
     ApiRequest.getMyCollectionData(curPage).then((result) {
       _articleData = ArticleBean.fromJson(result.data['data']);
       if (_articleData == null ||
@@ -186,8 +186,8 @@ class _MyCollectionPageState extends State<MyCollectionPage> {
   //收藏相关操作
   _clickUnCollection(int articleId, int index, int originId) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
-    _collectionHelper.unCollectionArticleForMyCollectionPage(
-        _scaffoldKey.currentState, (isOperateSuccess) {
+    _collectionHelper.unCollectionArticleForMyCollectionPage(context,
+        (isOperateSuccess) {
       setState(() {
         _articleData.datas.removeAt(index);
       });

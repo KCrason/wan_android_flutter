@@ -178,15 +178,13 @@ class _PublicArticleListPageState extends State<PublicArticleListPage> {
   _clickCollection(ArticleItem articleItem) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
     if (articleItem.collect) {
-      _collectionHelper.unCollectionArticle(_scaffoldKey.currentState,
-          (isOperateSuccess) {
+      _collectionHelper.unCollectionArticle(context, (isOperateSuccess) {
         setState(() {
           articleItem.collect = false;
         });
       }, articleItem.id);
     } else {
-      _collectionHelper.collectionArticle(_scaffoldKey.currentState,
-          (isOperateSuccess) {
+      _collectionHelper.collectionArticle(context, (isOperateSuccess) {
         setState(() {
           articleItem.collect = true;
         });
