@@ -245,6 +245,8 @@ class _PopularState extends State<Popular> with AutomaticKeepAliveClientMixin {
     );
   }
 
+
+
   //收藏相关操作
   _clickCollection(ArticleItem articleItem) async {
     CollectionHelper _collectionHelper = new CollectionHelper();
