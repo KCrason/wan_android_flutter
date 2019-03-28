@@ -4,5 +4,5 @@
 
 ## screenshot
 
-<img width="360" height="640" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/3821a89f977e8aaed18b78f1e4ad807.jpg"/>
+<img width="270" height="480" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/3821a89f977e8aaed18b78f1e4ad807.jpg"/>
 
