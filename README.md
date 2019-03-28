@@ -1,16 +1,8 @@
 # wan_android_flutter
 
-A new Flutter application.
+一个Flutter的小项目，旨在用于学习Flutter相关知识的实战演示。
 
-## Getting Started
+## screenshot
 
-This project is a starting point for a Flutter application.
+!['https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/3821a89f977e8aaed18b78f1e4ad807.jpg']
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
