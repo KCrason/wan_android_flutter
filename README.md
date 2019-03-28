@@ -4,5 +4,5 @@
 
 ## screenshot
 
+<img width="150" height="150" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/3821a89f977e8aaed18b78f1e4ad807.jpg"/>
 
-![命令运行网易云音乐](https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/3821a89f977e8aaed18b78f1e4ad807.jpg){: width="100px" height="100px"}
