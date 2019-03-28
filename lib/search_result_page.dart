@@ -93,30 +93,33 @@ class _SearchResultPageState extends State<SearchResultPage> {
     }
   }
 
-  List<TextSpan> createTextSpan(String title) {
-    String newKeyWord = '<em class=\'highlight\'>${widget.keyWord}</em>';
-    Match match = RegExp(newKeyWord).firstMatch(title);
-    if (match != null) {
-      int start = match.start;
-      int end = match.end;
-      String startStr = title.substring(0, start);
-      String endStr = title.substring(end);
-      return <TextSpan>[
-        TextSpan(
-            text: startStr,
-            style: TextStyle(fontSize: 16.0, color: Colors.black)),
-        TextSpan(
-            text: widget.keyWord,
-            style: TextStyle(color: Colors.blue, fontSize: 16)),
-        TextSpan(
-            text: endStr, style: TextStyle(fontSize: 16.0, color: Colors.black))
-      ];
-    } else {
-      return <TextSpan>[
-        TextSpan(
-            text: title, style: TextStyle(fontSize: 16.0, color: Colors.black)),
-      ];
-    }
+  List<TextSpan> createGroupTextSpans(String title) {
+    title = title
+        .replaceAll('<em class=\'highlight\'>', '')
+        .replaceAll('</em>', '');
+    String newKeyWord = '${widget.keyWord}';
+    RegExp regExp = RegExp(newKeyWord, caseSensitive: false);
+    Iterable<Match> matchIterable = regExp.allMatches(title);
+    List<TextSpan> textSpans = new List();
+    List<int> groupIndex = new List();
+    matchIterable.forEach((match) {
+      groupIndex.add(match.start);
+      groupIndex.add(match.end);
+    });
+    groupIndex.add(title.length);
+
+    int preStar = 0;
+
+    groupIndex.forEach((index) {
+      String str = title.substring(0 + preStar, index);
+      textSpans.add(TextSpan(
+          text: str,
+          style: TextStyle(
+              fontSize: 16.0,
+              color: regExp.hasMatch(str) ? Colors.blue : Colors.black)));
+      preStar = index;
+    });
+    return textSpans;
   }
 
   Widget _buildItem(ArticleItem articleItem) {
@@ -158,11 +161,11 @@ class _SearchResultPageState extends State<SearchResultPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         RichText(
-                          maxLines: 2,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             text: TextSpan(
-                                children:
-                                    createTextSpan('${articleItem.title}'))),
+                                children: createGroupTextSpans(
+                                    '${articleItem.title}'))),
                         Container(
                           margin: EdgeInsets.only(top: 6.0),
                           child: Row(
