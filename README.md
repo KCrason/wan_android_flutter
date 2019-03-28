@@ -15,6 +15,9 @@
 - 感谢[Flutter中文社区](https://flutterchina.club/)提供的Flutter中文入门支持。
 - 感谢[Flutter官网](https://flutter.dev/)提供的Flutter英文文档支持。
 - 感谢[DartPackages](https://pub.dartlang.org/)提供的Flutter相关插件支持。
-.....
+
+
+#### 最后，还要感谢你们的start支持 ^_^
+
 
 
