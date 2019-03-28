@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:transparent_image/transparent_image.dart';
 import 'main.dart';
 
 void main() {
@@ -11,7 +10,7 @@ void main() {
 
 class SplashWidget extends StatelessWidget {
   _intentPage(BuildContext context) async {
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 2), () {
       Navigator.of(context).pushAndRemoveUntil(
           new MaterialPageRoute(builder: (context) => MyApp()),
           (route) => false);
@@ -24,7 +23,7 @@ class SplashWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
           image: DecorationImage(
-              image: NetworkImage('https://source.unsplash.com/random'),
+              image: AssetImage('images/splash.jpg'),
               fit: BoxFit.cover)),
     );
   }
