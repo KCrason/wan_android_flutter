@@ -1,16 +1,10 @@
 # wan_android_flutter
 
-A new Flutter application.
+一个Flutter的小项目，旨在用于学习Flutter相关知识的实战演示。
 
-## Getting Started
+## screenshot
 
-This project is a starting point for a Flutter application.
+<img width="270" height="480" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/a62a6fb2f28c20b622b6cced8b45939.jpg"/><img width="270" height="480" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/de860bcf3a161636081d8fbef1e9b62.jpg"/><img width="270" height="480" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/f42e8cd5911b88f7775aacd0aca6ae4.jpg"/>
 
-A few resources to get you started if this is your first Flutter project:
+<img width="270" height="480" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/398d31a97a60a0dfad0c3f14aebc5f2.jpg"/><img width="270" height="480" src="https://github.com/KCrason/wan_android_flutter/blob/master/screenshot/3821a89f977e8aaed18b78f1e4ad807.jpg"/>
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
